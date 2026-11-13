@@ -8,6 +8,7 @@ from __future__ import annotations
 import hashlib
 import html
 import json
+from math import isfinite
 import re
 from dataclasses import dataclass
 from typing import Literal
@@ -26,10 +27,10 @@ class TranscriptSegment:
     text: str
 
     def __post_init__(self) -> None:
-        if self.start_seconds < 0:
-            raise ValueError("start_seconds must be non-negative")
-        if self.duration_seconds < 0:
-            raise ValueError("duration_seconds must be non-negative")
+        if not isfinite(self.start_seconds) or self.start_seconds < 0:
+            raise ValueError("start_seconds must be finite and non-negative")
+        if not isfinite(self.duration_seconds) or self.duration_seconds < 0:
+            raise ValueError("duration_seconds must be finite and non-negative")
         if not self.text.strip():
             raise ValueError("segment text must be non-empty")
 

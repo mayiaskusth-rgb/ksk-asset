@@ -59,3 +59,8 @@ Start with:
 
 The engine must be developed and tested as a Python product. Manual web searches by an assistant are not a substitute for its discovery pipeline. Preserve the existing MVP and build iteratively.
 
+
+
+## Private persistence API (Cloudflare)
+
+The first private persistence API is being built in `cloudflare/`. It is separate from the static GitHub Pages site and uses Cloudflare Workers + D1 behind Cloudflare Access. The initial slice supports one-video save/retrieval and manually pasted transcript revisions. No Cloudflare account resources or deployment are created by repository changes; see [Cloudflare setup and API notes](cloudflare/README.md).

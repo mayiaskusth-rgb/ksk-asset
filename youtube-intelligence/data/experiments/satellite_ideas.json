@@ -1,0 +1,112 @@
+[
+  {
+    "idea_id": "sat-01",
+    "title": "Why satellites stay in orbit",
+    "curiosity_question": "Why do satellites keep moving around Earth instead of falling down?",
+    "angle": "Explain orbital motion through the counterintuitive balance between forward speed and gravity.",
+    "lens": "orbital_physics",
+    "search_queries": [
+      "why don't satellites fall out of the sky",
+      "how satellites stay in orbit explained"
+    ]
+  },
+  {
+    "idea_id": "sat-02",
+    "title": "How GPS satellites locate us",
+    "curiosity_question": "How can signals from satellites tell a phone exactly where it is?",
+    "angle": "Unpack positioning, timing signals and the geometry behind GPS.",
+    "lens": "positioning_and_navigation",
+    "search_queries": [
+      "how GPS satellites know your location",
+      "how GPS works trilateration explained"
+    ]
+  },
+  {
+    "idea_id": "sat-03",
+    "title": "How satellites communicate with Earth",
+    "curiosity_question": "How does information travel between a satellite moving in space and a device on Earth?",
+    "angle": "Follow the path of a signal through ground stations, satellite transponders and receivers.",
+    "lens": "radio_communications",
+    "search_queries": [
+      "how satellites communicate with ground stations",
+      "how satellite communication works explained"
+    ]
+  },
+  {
+    "idea_id": "sat-04",
+    "title": "When satellites fail",
+    "curiosity_question": "What happens when a satellite breaks, loses power or stops responding?",
+    "angle": "Explore satellite failure, recovery attempts, redundancy and end-of-life decisions.",
+    "lens": "failure_and_reliability",
+    "search_queries": [
+      "what happens when a satellite stops working",
+      "satellite failure stories in space"
+    ]
+  },
+  {
+    "idea_id": "sat-05",
+    "title": "The growing problem of space junk",
+    "curiosity_question": "How dangerous is the debris left behind by old satellites and rocket launches?",
+    "angle": "Investigate orbital debris, collision risk and efforts to clean up Earth's orbital environment.",
+    "lens": "orbital_environment",
+    "search_queries": [
+      "space junk satellites collision problem explained",
+      "how dangerous is space debris"
+    ]
+  },
+  {
+    "idea_id": "sat-06",
+    "title": "How satellites observe the Earth",
+    "curiosity_question": "How can satellites detect changes on Earth's surface from hundreds of kilometres away?",
+    "angle": "Explore remote sensing through weather, agriculture, forests, oceans and disaster monitoring.",
+    "lens": "earth_observation",
+    "search_queries": [
+      "how Earth observation satellites work",
+      "how satellites monitor Earth from space"
+    ]
+  },
+  {
+    "idea_id": "sat-07",
+    "title": "How satellites reach their orbits",
+    "curiosity_question": "How does a rocket put a satellite into exactly the right orbit?",
+    "angle": "Follow launch, orbital insertion, transfer orbits and deployment.",
+    "lens": "launch_and_deployment",
+    "search_queries": [
+      "how rockets place satellites into orbit",
+      "how satellites are launched and deployed"
+    ]
+  },
+  {
+    "idea_id": "sat-08",
+    "title": "Who pays for satellites?",
+    "curiosity_question": "Who owns satellites, what do they cost and how do they make money?",
+    "angle": "Examine the economics of satellite operators, launch costs, services and business models.",
+    "lens": "economics_and_ownership",
+    "search_queries": [
+      "how much does a satellite cost and who owns them",
+      "satellite industry business model explained"
+    ]
+  },
+  {
+    "idea_id": "sat-09",
+    "title": "What spy satellites can actually see",
+    "curiosity_question": "How much detail can an imaging satellite really capture from orbit?",
+    "angle": "Separate real imaging capabilities and constraints from popular myths about surveillance satellites.",
+    "lens": "surveillance_and_limits",
+    "search_queries": [
+      "what can spy satellites actually see",
+      "how high resolution spy satellites work"
+    ]
+  },
+  {
+    "idea_id": "sat-10",
+    "title": "A world without satellites",
+    "curiosity_question": "Which parts of modern life would stop working or become less reliable if satellites vanished?",
+    "angle": "Trace dependencies across navigation, communications, weather, timing and emergency response.",
+    "lens": "systemic_dependency",
+    "search_queries": [
+      "what would happen if all satellites disappeared",
+      "what depends on satellites in everyday life"
+    ]
+  }
+]

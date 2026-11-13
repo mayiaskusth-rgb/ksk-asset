@@ -2,9 +2,19 @@
 
 An independent Python research-engineering product for YouTube topic discovery, creator-relative outlier analysis, and audience/storytelling intelligence.
 
-This module lives in the public `ksk-asset` repository but is **not a KSK story-development agent**. See the repository root README for the boundary and [HANDOFF.md](HANDOFF.md) for the full product specification and engineering instructions.
+This module lives in the public \`ksk-asset\` repository but is **not a KSK story-development agent**. See the repository root README for the boundary and [HANDOFF.md](HANDOFF.md) for the full product specification and engineering instructions.
 
-**Current status:** MVP foundation preserved. Iteration 0 architecture, data contracts and reuse reconnaissance are being established on `work/youtube-intelligence-iteration-0`. The executable MVP still uses local fixture data and deterministic scoring. Live YouTube discovery, channel-baseline collection, transcript/comment analysis, adaptive research and full opportunity reporting are future iterations.
+**Current status:** The Iteration 0 foundation is on \`work/youtube-intelligence-iteration-0\` and PR #1 remains open and unmerged. A separate satellite experiment branch, \`experiment/satellite-research-pipeline\`, builds on that foundation without modifying the PR branch. It adds a provider-neutral idea prompt/validator and records the first model dry run. Live LLM API execution and YouTube discovery are not implemented yet.
+
+## Active experiment: Satellites
+
+The first research input is deliberately only \`Satellites\`. The LLM is asked to generate ten distinct, independently searchable research ideas, without a supplied audience, geography, story arc or preferred angle.
+
+See:
+- [Satellite idea-generation experiment](docs/experiments/satellite_idea_generation.md)
+- [Structured idea output](data/experiments/satellite_ideas.json)
+
+The next stages are YouTube search, metadata hydration, creator-relative baselines/outlier selection, then transcript analysis. Video/frame analysis is explicitly deferred. The experiment document records overlap risks and tuning criteria.
 
 ## Start here
 
@@ -16,7 +26,7 @@ This module lives in the public `ksk-asset` repository but is **not a KSK story-
 
 Requires Python 3.11+.
 
-```bash
+\`\`\`bash
 cd youtube-intelligence
 python -m venv .venv
 # macOS/Linux:
@@ -28,7 +38,7 @@ pip install -e ".[dev]"
 pytest
 yti score --input data/sample_videos.json --output runs/demo/outliers.csv
 yti report --input runs/demo/outliers.csv --output runs/demo/report.md
-```
+\`\`\`
 
 ## What the MVP does
 
@@ -67,27 +77,25 @@ A views-to-subscriber ratio is a separate metric from creator-relative outlier s
 
 ## Project layout
 
-- `src/yti/` — Python package, additive contracts and CLI.
-- `data/` — synthetic fixtures only.
-- `tests/` — deterministic unit, contract and CLI tests.
-- `docs/` — architecture, data contracts, scoring and reuse research.
-- `runs/` — local generated output; generated runs are git-ignored.
-- `.github/workflows/python-tests.yml` — test suite on pushes and pull requests.
-- [`HANDOFF.md`](HANDOFF.md) — complete product vision, architecture, data-source constraints, development expectations, and next-chat instructions.
+- \`src/yti/\` — Python package, additive contracts and CLI.
+- \`data/\` — synthetic fixtures and non-sensitive experiment outputs.
+- \`tests/\` — deterministic unit, contract and CLI tests.
+- \`docs/\` — architecture, data contracts, scoring and research experiments.
+- \`runs/\` — local generated output; generated runs are git-ignored.
+- \`.github/workflows/python-tests.yml\` — test suite on pushes and pull requests.
+- [\`HANDOFF.md\`](HANDOFF.md) — complete product vision, architecture, data-source constraints, development expectations, and next-chat instructions.
 
 ## Roadmap
 
 1. [x] Deterministic outlier scoring and report generation.
 2. [x] Automated tests on GitHub Actions.
-3. [ ] Iteration 0: architecture, data contracts, scoring methodology, and systematic public GitHub/tool landscape review with build-vs-reuse decisions. See [HANDOFF.md](HANDOFF.md).
-4. [ ] YouTube metadata discovery adapter.
-5. [ ] Creator baseline builder and format/age-aware comparisons.
-6. [ ] Views-to-subscriber and improved creator-relative outlier analysis.
-7. [ ] Adaptive research strategist that refines discovery from broad topic briefs.
-8. [ ] Transcript adapter with source, language, and timestamp provenance.
-9. [ ] Thumbnail/frame observation workflow.
-10. [ ] Comment-theme and audience-question analysis using permitted, privacy-conscious samples.
-11. [ ] Comparative storytelling analysis and evidence-backed opportunity reports.
-12. [ ] Reproducible end-to-end experiments on barcode, camera evolution, and satellites.
-13. [ ] Reliability improvements: caching, retries, logging, quota/cost controls, and versioned reports.
-14. [ ] Consider a dashboard only after the CLI research engine is reliable.
+3. [x] Iteration 0 architecture, contracts, scoring methodology and reuse reconnaissance (PR #1 open; not merged).
+4. [x] Satellite idea-generation prompt, response validation and first model dry run (experiment branch).
+5. [ ] Configurable LLM provider adapter and persisted model/prompt/run metadata.
+6. [ ] YouTube search adapter and reproducible discovery runs (20 queries, 20–30 results per query for this experiment).
+7. [ ] Channel uploads, comparable baselines and creator-relative outlier selection.
+8. [ ] Transcript collection and evidence-linked theme/storytelling analysis.
+9. [ ] Comparative research report and opportunity hypotheses.
+10. [ ] Later: audience-comment analysis and video/frame analysis, only after the first pipeline proves useful.
+11. [ ] Reliability improvements: caching, retries, logging, quota/cost controls and versioned reports.
+12. [ ] Consider a dashboard only after the CLI research engine is reliable.

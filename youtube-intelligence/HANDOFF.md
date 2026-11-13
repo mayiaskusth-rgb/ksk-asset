@@ -440,3 +440,57 @@ Next engineering chat should:
 5. Use the three broad benchmark subjects only when running real experiments; do not supply finished story arcs.
 
 Do not implement every module immediately. Preserve the MVP and build one tested vertical slice at a time.
+
+
+---
+
+## 13. Active experiment override — satellite pipeline (2026-11-13)
+
+This section supersedes the earlier multi-topic benchmark sequence for the immediate next work. The first end-to-end experiment is **Satellites** only. Do not run barcode or camera topics in this phase.
+
+### Research brief
+
+The first-stage input is deliberately the single word:
+
+\`Satellites\`
+
+Do not supply a target audience, geography, language, predefined application, narrative, or story arc to the idea generator. The first stage must independently generate ten distinct, non-overlapping, independently searchable research ideas. It should return structured ideas and two search-query formulations per idea. These are hypotheses, not claims about popularity or demand.
+
+### Current experiment artifacts
+
+- \`src/yti/ideas.py\`: provider-neutral prompt builder and strict JSON parser/validator.
+- \`tests/test_ideas.py\`: tests for prompt constraints, exact count, required uniqueness and malformed output.
+- \`data/experiments/satellite_ideas.json\`: first structured ten-idea output.
+- \`docs/experiments/satellite_idea_generation.md\`: dry-run method, initial quality review, overlap risks and tuning criteria.
+
+**Honest status:** The first idea list was generated as a ChatGPT model dry run and then saved as a structured fixture. The Python module currently builds the prompt and validates model output; it does not yet invoke an LLM API. GitHub CI verification is pending. Do not describe this as a fully automated LLM pipeline.
+
+### Agreed pipeline order
+
+1. Narrow brief \`Satellites\` → generate 10 distinct ideas.
+2. Search YouTube using two queries per idea (20 queries total); collect 20–30 results per query, preserving query provenance and retrieval timestamps.
+3. Deduplicate by video ID and hydrate available metadata.
+4. Retrieve comparable uploads from each candidate's channel.
+5. Calculate creator-relative outlier scores using comparable format/age cohorts and a candidate-excluding median baseline. Keep low-sample candidates unscored or low-confidence.
+6. Select a shortlist for transcript retrieval.
+7. Analyze transcript themes, hooks, explanatory techniques, narrative structure and examples, with timestamped evidence.
+8. Produce a comparative report across the selected videos.
+
+Video/frame analysis is deferred. Comment analysis is also deferred until the first pipeline demonstrates value.
+
+### Tuning gates
+
+Do not tune idea generation based only on how the ideas sound. After YouTube discovery, evaluate:
+- relevance rate among the first 20–30 results per query;
+- unique videos after cross-query deduplication;
+- overlap between result sets for different ideas;
+- query result composition (Shorts/long-form, news, institutional channels, unrelated results);
+- whether creators have enough comparable uploads to support a reliable baseline.
+
+If two ideas return nearly identical video sets, refine their scope or merge them. If a query is weak, refine the query before rewriting the idea. Keep an audit trail of prompt version, model, input, raw response, parsed ideas and reviewer changes.
+
+### Next engineering increment
+
+Implement a configurable LLM provider adapter and persist prompt/model/run metadata. Then implement official YouTube Data API search and metadata hydration with quota accounting. For the first run, 20 search queries are within the documented default 100 \`search.list\` calls/day bucket, but pagination and retries consume additional calls. Keep result counts configurable and record partial failures.
+
+Do not proceed to transcript analysis until the outlier shortlist is based on actual creator baselines, not absolute views or YouTube search rank.

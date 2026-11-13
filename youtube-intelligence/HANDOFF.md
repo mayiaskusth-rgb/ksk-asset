@@ -726,3 +726,19 @@ A first Worker slice is being added under `cloudflare/`:
 - Local Vitest/Workers tests cover health, unauthenticated denial and D1 migration seeding.
 
 Do not deploy until the owner creates the development D1 database and Cloudflare Access application, fills the Wrangler placeholders, and explicitly authorizes deployment. The live D1 save/retrieve/revision flow and mobile Access session behavior remain to be tested. No transcript content or credentials belong in this public repository.
+
+
+## Persistence API implementation checkpoint — 2026-11-14
+
+Current implementation is on draft PR [#14](https://github.com/mayiaskusth-rgb/ksk-asset/pull/14), branch `feat/cloudflare-first-persistence-api`. Local D1 contract tests are on draft follow-up PR [#16](https://github.com/mayiaskusth-rgb/ksk-asset/pull/16), based on PR #14. Neither PR is merged.
+
+- Owner-created development D1 database: `ksk-research-dev`; ID is configured in `cloudflare/wrangler.toml`. This is a database identifier, not a credential.
+- Worker API implemented: health, canonical video upsert/project membership, manual transcript save, transcript retrieval and revision listing. Private routes fail closed and currently require a valid Cloudflare Access JWT.
+- Transcript revision behavior was tightened: identical content compared with the latest revision is idempotent; corrected content gets the next revision; reverting to an older version creates a new revision. Revision number is allocated in one SQL insert statement and protected by the unique (video_id, revision) constraint.
+- PR #16 adds local SQLite-backed D1 contract tests for video/project membership, transcript revision retention/uniqueness, foreign keys and append-only review events.
+- CI for the latest PR #14 head was triggered; inspect current Actions status before treating it as passed. The earlier known runs for the initial implementation passed, but do not substitute those for the latest head.
+- The owner declined the card-details prompt encountered during Cloudflare Zero Trust onboarding. No Access application/policy exists. Do not ask for card details, do not expose a public unauthenticated API, and do not deploy while Access placeholders remain.
+- No remote migration, Worker deployment, authenticated endpoint test, mobile browser test, Pages integration, bulk ingestion or transcript content transfer has happened. The live D1 is not yet proven to contain the schema.
+- Do not merge either PR or deploy without explicit owner approval. Next engineering gate: settle a secure owner-only auth mechanism compatible with the account constraints, then add authenticated Worker endpoint tests and complete the one-video/manual-transcript round trip against development D1.
+
+The owner is using an Android phone and should not be asked to run local shell commands. Keep future owner steps short and dashboard-based only when essential.

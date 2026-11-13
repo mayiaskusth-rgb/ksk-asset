@@ -64,7 +64,7 @@ def test_probe_both_is_sequential_and_stops_on_block(monkeypatch, tmp_path):
             )
 
     BlockOnFirst.calls.clear()
-    monkeypatch.setattr("scripts.run_transcript_probe.YtDlpTranscriptAdapter", BlockOnFirst)
+    monkeypatch.setattr("yti.transcript_probe.YtDlpTranscriptAdapter", BlockOnFirst)
     report = run_probe("both", tmp_path / "report.json")
 
     assert report["requested_video_count"] == 2

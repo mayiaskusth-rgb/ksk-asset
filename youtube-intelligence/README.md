@@ -4,7 +4,7 @@ An independent Python research-engineering product for YouTube topic discovery, 
 
 This module lives in the public `ksk-asset` repository but is **not a KSK story-development agent**. See the repository root README for the boundary and [HANDOFF.md](HANDOFF.md) for the full product specification and engineering instructions.
 
-**Current status:** MVP foundation. The first executable stage uses a local fixture dataset and deterministic scoring. Live YouTube discovery, channel-baseline collection, transcript/comment analysis, adaptive research, and full opportunity reporting are future iterations.
+**Current status:** MVP foundation preserved. Iteration 0 architecture, data contracts and reuse reconnaissance are being established on `work/youtube-intelligence-iteration-0`. The executable MVP still uses local fixture data and deterministic scoring. Live YouTube discovery, channel-baseline collection, transcript/comment analysis, adaptive research and full opportunity reporting are future iterations.
 
 ## Start here
 
@@ -67,9 +67,10 @@ A views-to-subscriber ratio is a separate metric from creator-relative outlier s
 
 ## Project layout
 
-- `src/yti/` — Python package and CLI.
+- `src/yti/` — Python package, additive contracts and CLI.
 - `data/` — synthetic fixtures only.
-- `tests/` — deterministic unit and CLI tests.
+- `tests/` — deterministic unit, contract and CLI tests.
+- `docs/` — architecture, data contracts, scoring and reuse research.
 - `runs/` — local generated output; generated runs are git-ignored.
 - `.github/workflows/python-tests.yml` — test suite on pushes and pull requests.
 - [`HANDOFF.md`](HANDOFF.md) — complete product vision, architecture, data-source constraints, development expectations, and next-chat instructions.

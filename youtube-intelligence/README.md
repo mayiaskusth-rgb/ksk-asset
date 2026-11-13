@@ -108,7 +108,7 @@ The intended analysis covers concepts, multi-label content format, narrative mod
 13. [ ] Reliability improvements: caching, retries, logging, quota/cost controls, and versioned reports.
 14. [ ] Consider a dashboard only after the CLI research engine is reliable.
 
-**Immediate next work:** establish private persistence with one manually supplied video and transcript. The two GitHub-hosted transcript extraction approaches have already been tested and blocked; do not repeat them or expand to bulk collection. Once persistence works, use one transcript to test analysis.
+**Immediate next work:** complete the live private-persistence setup and one manually supplied transcript round trip. The shortlist Transcript tab and Worker/D1 API implementation are merged and CI-verified, but Cloudflare Access is not configured, the Worker is not deployed, and the remote D1 migration is not applied. The two GitHub-hosted transcript extraction approaches have already been tested and blocked; do not repeat them or expand to bulk collection. Once one transcript can be saved and retrieved securely, use it to test analysis.
 
 
 ## Transcript access diagnostic

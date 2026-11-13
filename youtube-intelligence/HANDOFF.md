@@ -533,3 +533,33 @@ Full findings and links are in `docs/experiments/transcript_tools_reconnaissance
 6. Update module README, root README and this handoff in every material PR. Keep branch/PR/commit/test/experiment status explicit.
 
 **Next chat must start from this section and inspect the branch.** Do not claim this branch is merged or that transcript acquisition/analysis is working until code, tests and a bounded experiment establish that.
+
+
+## 17. First transcript code increment (2026-11-13)
+
+The branch now contains the first executable transcript foundation:
+
+- `src/yti/transcripts.py`
+  - `TranscriptSegment`: start, duration, end property and non-empty text validation.
+  - `TranscriptObservation`: video ID, explicit status (retrieved / no_captions / unavailable / blocked / failed), source provenance, language, caption type, source format, segments and normalized-content SHA-256.
+  - `parse_vtt`: deterministic WebVTT cue parser; strips markup, decodes entities, preserves cue timing and sorts by start.
+  - `parse_json3`: deterministic YouTube JSON3 event parser; preserves millisecond offsets/durations and joins text fragments.
+  - `make_transcript_observation`: returns a truthful no_captions state for empty parsed content.
+  - No network calls and no third-party dependencies.
+- `tests/test_transcripts.py`: synthetic tests for VTT, JSON3, timing, markup/entities, empty captions, status invariants and checksum.
+
+**Not implemented:** yt-dlp retrieval adapter, language-track discovery/selection, live collection, retries/cache, transcript quality scoring, analysis execution. Parser tests have been added but CI for the latest branch commit must be checked before claiming they pass.
+
+### CI correction discovered
+
+The first PR #11 CI run failed on an existing research explorer assertion, not on transcript code: `tests/test_research_explorer_data.py` expected the literal labels “Not collected yet” and “Not analysed yet”, while the expanded watch-page markup had changed the wording. This was corrected in `research.html` without changing functionality. Verify the next CI run against the latest head.
+
+### Next implementation slice
+
+1. Verify the current PR head and CI.
+2. Review parser edge cases; add any missing deterministic tests.
+3. Add a yt-dlp adapter using its Python API (not shell interpolation), isolated behind a small interface. Keep yt-dlp an optional/runtime dependency only if the package design supports it cleanly; otherwise add an explicit pinned-compatible dependency and document it.
+4. Adapter should first list caption tracks, prefer creator-provided captions, then optionally auto captions; never silently choose translated captions. Return language/caption type/source format accurately.
+5. Use skip-download semantics; never fetch media. Bound request count and timeout, cache only private/local artefacts, perform zero retries initially, and stop on 403/429/challenge signals. Do not use cookies, proxies or bypasses.
+6. Unit tests mock the extractor boundary; no live YouTube calls in CI. Add an opt-in manual experiment command only after tests and error mapping are sound.
+7. Update this handoff and both READMEs as the implementation evolves.

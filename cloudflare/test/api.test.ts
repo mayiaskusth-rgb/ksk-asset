@@ -1,10 +1,11 @@
-import { fetchMock, SELF, env } from "cloudflare:test";
+import { SELF, env } from "cloudflare:test";
 import worker from "../src/index";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 const keyId = "ksk-api-integration-test-key";
 let authorization: string;
 let issuer: string;
+let jwksPayload: { keys: JsonWebKey[] } | undefined;
 
 function base64Url(bytes: Uint8Array): string {
   let binary = "";
@@ -24,9 +25,7 @@ async function createAccessToken(): Promise<string> {
   );
   const publicJwk = await crypto.subtle.exportKey("jwk", pair.publicKey);
   const jwks = { ...publicJwk, kid: keyId, alg: "RS256", use: "sig" };
-  fetchMock.get(issuer)
-    .intercept({ path: "/cdn-cgi/access/certs", method: "GET" })
-    .reply(200, { keys: [jwks] });
+  jwksPayload = { keys: [jwks] };
 
   const header = encodeJson({ alg: "RS256", typ: "JWT", kid: keyId });
   const payload = encodeJson({
@@ -61,13 +60,15 @@ async function authenticatedFetch(path: string, init: RequestInit = {}): Promise
 describe("KSK private research API", () => {
   beforeAll(async () => {
     issuer = `https://${env.ACCESS_TEAM_DOMAIN}.cloudflareaccess.com`;
-    fetchMock.activate();
-    fetchMock.disableNetConnect();
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      if (String(input) !== `${issuer}/cdn-cgi/access/certs` || !jwksPayload) throw new Error("Unexpected outbound request in API test");
+      return new Response(JSON.stringify(jwksPayload), { status: 200, headers: { "content-type": "application/json" } });
+    });
     authorization = await createAccessToken();
   });
 
   afterAll(() => {
-    fetchMock.assertNoPendingInterceptors();
+    vi.unstubAllGlobals();
   });
 
   it("exposes only a minimal health response without authentication", async () => {

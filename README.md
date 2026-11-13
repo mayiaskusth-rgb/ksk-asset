@@ -32,6 +32,8 @@ Open http://localhost:8000/.
 
 ### GitHub Pages
 
+The existing [Visual Asset Library](index.html) remains the home page. The additive [YouTube Research Run Explorer](research.html) is a separate page; neither page replaces the other.
+
 This repository includes a GitHub Actions deployment workflow at `.github/workflows/pages.yml`. In Settings → Pages, choose **GitHub Actions** as the deployment source if prompted.
 
 Expected site URL: https://mayiaskusth-rgb.github.io/ksk-asset/

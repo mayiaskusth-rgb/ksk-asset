@@ -473,7 +473,7 @@ The public repository's existing root `index.html` is the KSK Visual Asset Libra
 
 ## 16. Transcript intelligence foundation — latest handoff (2026-11-13)
 
-**Active branch:** `research/transcript-intelligence-foundation`  
+**Active branch:** `research/transcript-intelligence-foundation` ([draft PR #11](https://github.com/mayiaskusth-rgb/ksk-asset/pull/11))  
 **Base:** current `main` after PR #10 (expanded watch-page alignment).  
 **Status:** Design/reconnaissance work in progress. This branch is not merged. No transcript collector, automated analysis runtime, new Python dependency, or dashboard work has been implemented.
 

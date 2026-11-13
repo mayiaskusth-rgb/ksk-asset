@@ -48,11 +48,12 @@ The Python project lives in [`youtube-intelligence/`](youtube-intelligence/).
 
 Its purpose is to discover audience demand, identify videos that outperform their creators' normal performance, analyze storytelling and audience signals, and produce evidence-backed opportunity reports.
 
-**Current status:** MVP foundation. The current executable stage uses local fixture data and deterministic scoring. Live YouTube discovery, channel-baseline collection, transcript/comment analysis, and adaptive research are future iterations.
+**Current status:** MVP preserved; Iteration 0 architecture, contracts and reuse research are complete on the feature branch (PR #1). The current executable stage still uses local fixture data and deterministic scoring. Live YouTube discovery, channel-baseline collection, transcript/comment analysis, and adaptive research are future iterations.
 
 Start with:
 - [YouTube Intelligence README](youtube-intelligence/README.md) — current capabilities, setup, and roadmap.
 - [Engineering handoff](youtube-intelligence/HANDOFF.md) — authoritative product vision, architecture, constraints, iteration plan, and instructions for a new engineering chat.
+- [Architecture and data contracts](youtube-intelligence/docs/architecture.md) and [reuse research](youtube-intelligence/docs/repo_landscape.md) — Iteration 0 engineering decisions.
 
 The engine must be developed and tested as a Python product. Manual web searches by an assistant are not a substitute for its discovery pipeline. Preserve the existing MVP and build iteratively.
 

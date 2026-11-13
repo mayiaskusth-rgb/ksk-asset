@@ -651,3 +651,8 @@ Added on the active PR #11 branch:
 6. Expand to a few more only after review. Do not process all 47 yet.
 
 The analyser remains **designed but not selected/implemented as an execution module**. The agent instructions and schema are specifications, not a working automated analyser.
+
+
+### Probe harness CI verification — 2026-11-13
+
+The first CI run for the new probe tests caught a test import/monkeypatch target issue; it did not reach the live adapter. The test was corrected to import and patch `yti.transcript_probe` directly. Latest verified CI run [43463631750](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43463631750) passed on the probe implementation: **37 tests passed**, and the existing five-video sample scoring/report pipeline completed. This validates the bounded runner's mocked behavior and privacy-safe report shape only. It is not live YouTube validation.

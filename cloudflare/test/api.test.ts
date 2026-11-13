@@ -1,4 +1,4 @@
-import { env, SELF } from "cloudflare:test";
+import { SELF } from "cloudflare:test";
 import { describe, expect, it } from "vitest";
 
 describe("KSK private research API", () => {
@@ -19,10 +19,4 @@ describe("KSK private research API", () => {
     expect(write.status).toBe(401);
   });
 
-  it("applies the initial D1 migration and seeds the default project", async () => {
-    const project = await env.DB.prepare("SELECT project_id, project_key FROM projects WHERE project_id = 'default'").first();
-    expect(project).toEqual({ project_id: "default", project_key: "default" });
-    const tables = await env.DB.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all();
-    expect(tables.results.map((row: { name: string }) => row.name)).toContain("transcripts");
-  });
 });

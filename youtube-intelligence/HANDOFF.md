@@ -577,3 +577,18 @@ Added on the active PR #11 branch:
 - `tests/test_transcript_adapter.py` mocks the yt-dlp Python API to verify manual-caption preference, skip-download options, no language substitution, 429 handling and URL validation.
 
 **Caution:** This adapter has not yet been run against live YouTube. Confirm actual yt-dlp subtitle output behavior (including extension and requested_subtitles metadata) before a live experiment. No claims of live reliability yet. Current CI status must be checked against the latest PR head; test code was added after prior CI runs.
+
+
+## 19. One-video transcript CLI (2026-11-13)
+
+Added `yti transcript` to the existing CLI:
+```bash
+yti transcript --video-id VIDEO_ID --url YOUTUBE_URL --language en --output runs/private/VIDEO_ID.transcript.json
+```
+- Uses the optional yt-dlp adapter.
+- Writes a structured JSON observation (including segments and provenance) to the caller-specified local path.
+- Creates parent directories and prints only the status/path.
+- CLI test mocks the adapter and verifies JSON output.
+- The command does not add a public fixture or commit transcript data. The user/operator must keep output in a private local path.
+
+Next: verify latest CI; confirm current yt-dlp API output details before live use; run only a tiny sequential satellite sample with no retries and stop on access challenges. The adapter/CLI are not yet experimentally validated against YouTube.

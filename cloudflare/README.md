@@ -26,12 +26,12 @@ The YouTube Intelligence Engine is independent from the private KSK editorial wo
 
 ## Current repository status — 2026-11-14
 
-- Draft PR [#17](https://github.com/mayiaskusth-rgb/ksk-asset/pull/17) on branch `feat/youtube-intelligence-next-phase` contains authenticated Worker integration tests, the existing-shortlist transcript UI, CORS handling, and documentation updates.
+- PR [#17](https://github.com/mayiaskusth-rgb/ksk-asset/pull/17) was merged to main as commit `f755d4da8e7c24bfa4c1bd6f4d89f62cda1939df`. It contains authenticated Worker integration tests, the existing-shortlist transcript UI, CORS handling, and documentation updates.
 - The UI uses the selected shortlist record's existing YouTube ID/title/channel. It offers a Worker API URL field, transcript textarea, language code, save action and revision retrieval. The Worker URL is stored in browser localStorage; transcript content is sent to Cloudflare, not committed to GitHub.
 - Python CI passed for the updated explorer/test contract on head `60e3fdc7600df823be5ea87294f8b9d460fd1256` (run [43509321262](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509321262)). The Explorer test was updated to expect the new transcript controls.
-- Cloudflare API CI passed on head `e4c657b90ee80108e15236ad1eeb5099b590accc` (run [43509753664](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509753664)). The authenticated test invokes the Worker handler directly, simulates the edge-injected Access assertion, and stubs the JWKS fetch; production authentication code is unchanged.
-- Python CI passed on the same head (run [43509753930](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509753930)).
-- PR #17 remains a draft and is not merged. Do not merge until Cloudflare API CI is green on the latest head.
+- Cloudflare API CI passed on final PR head `5df01cf74072209bf6772d58fbeda7e5a5ea018b` (run [43509893658](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509893658)). The authenticated test invokes the Worker handler directly, simulates the edge-injected Access assertion, and stubs the JWKS fetch; production authentication code is unchanged.
+- Python CI passed on the same PR head (run [43509893760](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509893760)).
+- PR #17 is merged. Main-branch workflows, including the GitHub Pages deployment, are being checked separately.
 - Earlier PRs #14 and #16 were consolidated into the branch/PR #17 development line; use the live PR state rather than old handoff entries when checking merge status.
 
 ## Cloudflare account and authentication constraints

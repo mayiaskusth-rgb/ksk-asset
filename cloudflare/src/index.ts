@@ -7,11 +7,12 @@ interface Env {
 type AccessClaims = { iss?: string; aud?: string | string[]; exp?: number; nbf?: number; email?: string };
 
 let cachedKeys: { expiresAt: number; keys: JsonWebKey[] } | undefined;
+const APP_ORIGIN = "https://mayiaskusth-rgb.github.io";
 
 function json(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
+    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "access-control-allow-origin": APP_ORIGIN, "access-control-allow-credentials": "true", "vary": "Origin" },
   });
 }
 
@@ -81,6 +82,18 @@ function validVideoId(value: unknown): value is string {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    if (request.method === "OPTIONS") {
+      const origin = request.headers.get("Origin");
+      if (origin !== APP_ORIGIN) return new Response(null, { status: 403 });
+      return new Response(null, { status: 204, headers: {
+        "access-control-allow-origin": APP_ORIGIN,
+        "access-control-allow-credentials": "true",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-headers": "content-type, cf-access-jwt-assertion",
+        "access-control-max-age": "600",
+        "vary": "Origin",
+      } });
+    }
     if (url.pathname === "/health" && request.method === "GET") {
       return json({ ok: true, service: "ksk-research-api" });
     }

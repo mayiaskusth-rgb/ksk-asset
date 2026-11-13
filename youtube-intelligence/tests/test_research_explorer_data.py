@@ -53,5 +53,7 @@ def test_explorer_has_direct_link_and_opt_in_player_placeholders():
     assert "research-runs/index.json" in page
     assert "youtube-nocookie.com/embed/" in page
     assert "Open on YouTube" in page
-    assert "Not collected yet" in page
+    assert "Paste the transcript copied from YouTube." in page
+    assert "Save transcript to Cloudflare" in page
+    assert "Retrieve saved transcript" in page
     assert "Not analysed yet" in page

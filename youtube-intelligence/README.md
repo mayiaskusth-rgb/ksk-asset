@@ -4,7 +4,7 @@ An independent Python research-engineering product for YouTube topic discovery, 
 
 This module lives in the public `ksk-asset` repository but is **not a KSK story-development agent**. See the repository root README for the boundary and [HANDOFF.md](HANDOFF.md) for the full product specification and engineering instructions.
 
-**Current status (2026-11-13):** MVP and Iteration 0 foundation are preserved and merged into `main`. The active design branch is `research/transcript-intelligence-foundation` ([draft PR #11](https://github.com/mayiaskusth-rgb/ksk-asset/pull/11)). It adds transcript-tool reconnaissance, a transcript-intelligence analysis contract, an output-schema proposal, and updated handoff/roadmap notes. These are design artefacts only: transcript acquisition and automated analysis are not implemented or tested yet.
+**Current status (2026-11-13):** MVP and Iteration 0 foundation are preserved and merged into `main`. The active design branch is `research/transcript-intelligence-foundation` ([draft PR #11](https://github.com/mayiaskusth-rgb/ksk-asset/pull/11)). It adds transcript-tool reconnaissance, a transcript-intelligence analysis contract, an output-schema proposal, and updated handoff/roadmap notes. The first code increment now includes provider-neutral transcript observation/segment records plus deterministic WebVTT and YouTube JSON3 parsers, covered by synthetic fixtures. This is local normalization only: no network collector, YouTube retrieval, automated analysis or live-data experiment is implemented yet.
 
 **Research Run Explorer:** The static [explorer](../research.html) displays the first bounded satellite run (10 searches, 50 result slots, 47 unique videos), with per-query positions, provenance, metadata, direct YouTube links and an optional embedded player. Transcript and video-analysis sections are explicit placeholders until those stages are implemented.
 
@@ -69,7 +69,7 @@ A views-to-subscriber ratio is a separate metric from creator-relative outlier s
 
 ## Project layout
 
-- `src/yti/` — Python package, additive contracts and CLI.
+- `src/yti/` — Python package, additive contracts, transcript normalization and CLI.
 - `data/` — synthetic fixtures only.
 - `tests/` — deterministic unit, contract and CLI tests.
 - `docs/` — architecture, data contracts, scoring and reuse research.

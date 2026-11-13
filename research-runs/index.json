@@ -1,4 +1,13 @@
 {
   "schema_version": "1.0",
-  "runs": []
+  "runs": [
+    {
+      "run_id": "43436550833",
+      "topic": "Satellites",
+      "started_at": "2026-11-13T13:46:26.475773+00:00",
+      "path": "./research-runs/satellite-43436550833.json",
+      "unique_videos": 47,
+      "queries": 10
+    }
+  ]
 }

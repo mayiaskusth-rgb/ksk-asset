@@ -58,3 +58,16 @@
 3. Transcript extraction comparison: official caption access constraints vs maintained Python libraries and MCP providers.
 4. A tiny local transcript index only after a real corpus and search-quality benchmark exist.
 5. A safe comment-sampling spike with retention limits and explicit capability reporting.
+
+
+## Transcript-focused follow-up review (2026-11-13)
+
+These candidates were inspected after the initial broad landscape. They refine transcript acquisition and analysis decisions.
+
+| Project | Verified observations | License / compatibility | Decision |
+|---|---|---|---|
+| [youtube-transcript-extractor](https://github.com/GregHabiskis/youtube-transcript-extractor) | FastAPI app using yt-dlp Python API; README describes captions-only retrieval, creator-caption preference, JSON3/VTT/SRT parsing, deterministic rolling-caption cleanup and timestamp preservation; source tree includes tests. | GitHub repository metadata returned no declared license. pyproject.toml requires Python >=3.14,<3.15; our package targets Python 3.11+. | Borrow design only. No code reuse or dependency until license and Python compatibility are resolved. |
+| [analyze-video](https://github.com/eruto-skills/analyze-video) | MIT-licensed Claude Code/Codex skill. Full transcript reading; macro/micro structure; unscored axes for hook, information density, hedging, credibility, re-engagement, memorable phrases, throughline, contrast and closing; comparison is technique contrast, not quality ranking. | MIT license is present. It is an instruction skill, not a Python runtime package. | Borrow analytical ideas and adapt to our own rubric; do not add as runtime dependency or copy large blocks of its text. |
+| [youtube-transcriber](https://github.com/nickholdenproper/youtube-transcriber) | Python CLI/GUI/API; yt-dlp captions, local Whisper fallback, Ollama context analysis, optional frame/voice analysis and transcript-grounded reconciliation. | Custom Free-to-Use License 1.0 / NOASSERTION, with standalone resale restriction. Audio fallback downloads media; cloud Ollama is outside our first-pass constraints. | Borrow architecture concepts only; no code/dependency adoption. Separate transcript, visual and voice evidence streams are a useful future design pattern. |
+
+These are repository snapshots, not independent reliability or legal assessments. Recheck license, activity, terms and source behavior before any future adoption.

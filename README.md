@@ -59,3 +59,10 @@ Start with:
 
 The engine must be developed and tested as a Python product. Manual web searches by an assistant are not a substitute for its discovery pipeline. Preserve the existing MVP and build iteratively.
 
+
+
+## Private persistence API (Cloudflare)
+
+A first private persistence API implementation is available for review in draft PR [#14](https://github.com/mayiaskusth-rgb/ksk-asset/pull/14), with local D1 contract tests proposed in draft PR [#16](https://github.com/mayiaskusth-rgb/ksk-asset/pull/16). Neither PR is merged or deployed.
+
+The Worker currently provides health, canonical video save/retrieval, and manually pasted transcript revision endpoints. Private routes currently require Cloudflare Access JWT validation. The owner has created the development D1 database, but has not created an Access application or deployed/migrated the Worker. The Access onboarding prompted for payment details; do not ask the owner to provide card details. A secure owner-only authentication approach compatible with the account constraints is still a prerequisite. See [Cloudflare setup and API notes](cloudflare/README.md) and the dated checkpoint in [the engineering handoff](youtube-intelligence/HANDOFF.md).

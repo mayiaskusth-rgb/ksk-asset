@@ -1,73 +1,73 @@
 # KSK Cloudflare Persistence
 
-This directory defines the backend foundation for the YouTube Research Explorer. It is deliberately separate from the existing GitHub Pages frontend and from the Python research engine.
+Private persistence API for the independent YouTube Audience Intelligence Engine. This is a separate backend layer; it does not replace GitHub, the existing GitHub Pages site, or the Python research runtime.
 
-## Responsibilities
+## System boundaries
 
-- **GitHub** remains the source of truth for code, reviews, versioning, tests and deployment configuration.
-- **GitHub Pages** continues to host the existing static Research Explorer and asset gallery.
-- **Cloudflare Workers** will expose a small authenticated API.
-- **Cloudflare D1** will persist projects, research runs, canonical video records, review decisions, transcripts, notes and analysis results.
-- **Python / GitHub Actions** will fetch saved transcript content through the API when analysis runs, then write structured findings back.
+- **GitHub:** source code, version history, pull requests and CI.
+- **GitHub Pages:** existing static Asset Gallery and Research Run Explorer. Keep the current Pages deployment intact.
+- **Cloudflare Worker:** proposed private API only; deployed from this directory, never from the repository root.
+- **Cloudflare D1:** private structured persistence.
+- **Python / GitHub Actions:** research and analysis execution.
 
-Cloudflare is a runtime and persistence layer, not a replacement for GitHub repositories.
+The YouTube Intelligence Engine is not a KSK editorial agent. The private kabhi-socha-kya repository remains the source of truth for KSK's editorial and production workflow. No automated integration is implemented.
 
-## Safety boundary
+## First API slice in draft PR #14
 
-Do not connect the existing repository root to a generic Worker deployment. The current repository contains the public static website and its Pages workflow. The Worker must be deployed from this dedicated directory with its own Wrangler configuration and entry point.
+- `GET /health`: non-sensitive liveness response.
+- `POST /api/videos`: create/update a canonical YouTube video and associate it with a project (default project when omitted).
+- `GET /api/videos/{video_id}`: return video metadata and transcript revisions, newest first.
+- `POST /api/videos/{video_id}/transcripts`: save a manually supplied transcript.
+- Identical content compared with the latest revision is idempotent; changed content creates a new revision. Reverting to an earlier transcript creates a new revision rather than rewriting history.
+- Transcript request body limit: 512 KiB. Responses are marked `no-store`.
+- Private routes currently validate Cloudflare Access JWT signature, issuer, audience and expiry. CORS and public Pages integration are intentionally not implemented.
 
-Never put API secrets, Cloudflare account tokens, Access service tokens, private transcripts or user notes in this public repository.
+## Current repository status — 2026-11-14
 
-The API must be protected before any write or private read endpoint is exposed. Preferred initial browser access is Cloudflare Access in front of a dedicated API hostname, with Worker-side authorization checks. The browser must use the Access-supported login/session flow for cross-origin API calls; verify cookie and CORS behaviour in a real mobile-browser test before integrating the public Pages UI. CORS is not authentication. Do not rely on an unguessable URL or a secret embedded in frontend JavaScript. The first deployment is single-user/private; do not assume the schema is ready for multiple independent users or tenants.
+- Draft PR [#14](https://github.com/mayiaskusth-rgb/ksk-asset/pull/14), branch `feat/cloudflare-first-persistence-api`, contains the Worker API and initial migration. Its Cloudflare API CI and Python CI passed on head `091d47b76272129e71f5e1ff4080641ec0844fe4`.
+- Draft PR [#16](https://github.com/mayiaskusth-rgb/ksk-asset/pull/16), branch `test/local-d1-persistence-contract`, adds local SQLite-backed D1 contract tests. A test-harness fix was committed through `c5afaf634a26f028896e959eabd5701e4f063af0`, but no CI run for that exact head was visible at the last status check. The earlier failed run was for the older head `2b3d926514bf5a73e80561093f564170a8ae48a5`; do not treat it as a result for the fix.
+- Both PRs remain open drafts and are not merged. Do not merge, deploy, or apply remote migrations without explicit owner approval.
 
-## Data model
+## Cloudflare account and authentication constraints
 
-The first schema is in [schema.sql](schema.sql). It is designed for the intended lifecycle, but the first implementation/test will use only a narrow subset:
+The owner has already created the development D1 database:
 
-1. Create or retrieve one canonical video record by YouTube video ID.
-2. Save a manually pasted transcript with source and language metadata.
-3. Retrieve that transcript from a separate client.
-4. Update the transcript without duplicating the canonical video.
-5. Confirm that unauthorized requests are rejected.
+- Name: `ksk-research-dev`
+- Database ID: `31c27fa9-cd26-4ac2-867d-710096093dad`
 
-The schema also reserves structures for multiple projects, research runs, discovery provenance, Keep / Drop / Review decisions, human notes, analysis runs and evidence-backed findings. Those features are not part of the first persistence test.
+The ID is an identifier, not a credential. It is configured in `wrangler.toml`.
 
-## Video lifecycle decisions
+Cloudflare Access onboarding requested payment details. The owner declined to provide card details. No Access application/policy exists, and the Access team/audience values remain placeholders. **Do not ask the owner to enter card details. Do not deploy while authentication is unresolved. Do not expose an unauthenticated public API.**
 
-A review decision is not deletion. 'keep', 'drop' and 'review_later' are reversible states. Dropped videos remain available for audit and can be restored. The reason and reviewer note are stored separately from machine-generated analysis.
+The next engineering task is to choose and implement a secure owner-only authentication method that works within the account constraints, fails closed when not configured, and keeps secrets out of Git and chat. Add authenticated endpoint tests before deployment. Do not assume a particular Cloudflare dashboard capability or paid-plan entitlement without verifying it.
 
-Manual additions use added_via = 'manual' and enter the same video lifecycle as discovered results.
+## Local development and tests
 
-A canonical video is keyed by YouTube video ID. Project membership and research-run appearances are separate relationships, so the same video can appear in multiple projects or runs without duplicating its transcript.
+Requires Node.js 20+ and Wrangler 4. The owner currently has only an Android phone and should not be asked to run local shell commands.
 
-## Transcript handling
+```sh
+cd cloudflare
+npm install
+npm run db:migrate:local
+npm test
+npm run dev
+```
 
-- Transcript text is private application data and must remain in D1 or another private storage service.
-- Do not commit transcripts, transcript excerpts, personal notes or analysis output containing private material to this public repository.
-- Preserve language, caption type, source method, retrieval time, content checksum and status.
-- Manual paste is a supported source; automated providers can be added later behind the same transcript contract.
-- Keep transcript revisions rather than silently overwriting the only copy.
+The Vitest/Workers D1 test harness is under active repair in PR #16. Verify CI on the latest PR head before treating the persistence contract tests as passing. The PR #14 API CI pass alone does not prove the D1 contract suite or authenticated API flow.
 
-## Environments and deployment
+## Deployment and first live test — NOT YET DONE
 
-Use separate development and production Worker environments and separate D1 databases. Do not point test workflows at production data.
+No remote migration, Worker deployment, authenticated endpoint test, mobile browser test, or Pages integration has happened. The existence of the D1 database does not prove that its schema has been applied.
 
-The Worker will be deployed from cloudflare/ using a dedicated Wrangler configuration. The GitHub integration must be configured to use this directory as its project root, not the repository root. Deployment configuration will be added only after the Worker implementation and tests are ready.
+After authentication is implemented and tested:
 
-Initial account setup, D1 creation, Access policy setup and secret configuration require the account owner's explicit actions in Cloudflare. No account token or credential should be pasted into chat or committed.
+1. Prepare exact phone-friendly Cloudflare dashboard steps for the owner; do not ask for local CLI commands.
+2. Obtain explicit approval before applying the remote D1 migration or deploying.
+3. Save one canonical video and a manually pasted transcript.
+4. Retrieve it and verify revision 1.
+5. Save identical text and verify no duplicate revision is created.
+6. Save corrected text and verify revision 2.
+7. Verify an unauthenticated request is rejected.
+8. Only after this bounded test succeeds should mobile UI integration be considered.
 
-## First milestone acceptance criteria
-
-- [ ] Worker code and API contract reviewed.
-- [ ] D1 database created for development.
-- [ ] Access protection configured and verified.
-- [ ] One video can be saved and retrieved.
-- [ ] A manually pasted transcript can be saved and retrieved by video ID.
-- [ ] Duplicate saves update/create transcript revisions without duplicating the video.
-- [ ] Unauthorized read/write requests fail.
-- [ ] Automated tests pass.
-- [ ] No production deployment or migration until development test passes.
-
-## Current status
-
-Architecture and schema proposal only. No Cloudflare resources have been created, no Worker has been deployed, and no live database exists yet.
+Do not add bulk imports, automated transcript-provider fallback, analysis endpoints, or UI integration in this first persistence slice. Do not put transcript text, credentials, tokens, or private notes in this public repository or CI artifacts.

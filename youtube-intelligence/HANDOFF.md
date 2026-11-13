@@ -2,7 +2,7 @@
 
 **Purpose:** This is the authoritative product and engineering handoff for the independent YouTube research module in this repository. A new ChatGPT engineering chat should read this file and the current code before making changes.
 
-**Start command for the next chat:** “Read the handoff and repository state, verify the Iteration 0 PR status, then plan Iteration 1.”
+**Start command for the next chat:** “Read the handoff and current branch/PR state. Continue the transcript intelligence foundation from the latest dated handoff section; do not restart completed UI work or assume transcript collection is implemented.”
 
 **Repository:** [mayiaskusth-rgb/ksk-asset](https://github.com/mayiaskusth-rgb/ksk-asset)  
 **Module:** `youtube-intelligence/`  
@@ -469,3 +469,67 @@ The public repository's existing root `index.html` is the KSK Visual Asset Libra
 - Upload dates were unavailable in the first run.
 - Channel IDs are intentionally omitted from the public display fixture; raw workflow artifact retains the full extractor output for seven days.
 - The current fixture is a snapshot; it does not establish view velocity or historical performance.
+
+
+## 16. Transcript intelligence foundation — latest handoff (2026-11-13)
+
+**Active branch:** `research/transcript-intelligence-foundation`  
+**Base:** current `main` after PR #10 (expanded watch-page alignment).  
+**Status:** Design/reconnaissance work in progress. This branch is not merged. No transcript collector, automated analysis runtime, new Python dependency, or dashboard work has been implemented.
+
+### User-approved direction
+
+Proceed in two distinct capabilities:
+
+1. **Transcript acquisition:** retrieve captions for selected videos; preserve source, language, caption type, timestamped segments, retrieval status and provenance. No media download in the first pass.
+2. **Transcript intelligence:** explain the subject/concepts, content format, narrative mode, hook/open loops/payoff, structure, explanation techniques, tone/rhetoric, pacing, strong moments and reusable techniques.
+
+The user wants a practical research tool, not a generic summarizer or an opaque video-quality score. Keep the existing `VIDEO_ANALYSIS_AGENT.md` as the broader video communication analysis contract; the new transcript-specific contract gives more detail for transcript-derived signals.
+
+### New design files on this branch
+
+- `docs/agents/TRANSCRIPT_INTELLIGENCE_AGENT.md` — versioned analysis instructions and evidence rules.
+- `docs/transcript_analysis_schema.md` — proposed provider-neutral structured output; conceptual v0.1, not yet JSON Schema or Python models.
+- `docs/experiments/transcript_tools_reconnaissance.md` — inspected repositories, license notes, constraints and reuse decisions.
+- `docs/experiments/transcript_collection.md` — acquisition design; now links the reconnaissance and selected first spike.
+- Module README updated with current status, links, roadmap and immediate next work.
+- Root README updated to identify this branch and avoid stale Iteration 0 status.
+
+### Public repository reconnaissance (checked 2026-11-13)
+
+1. [youtube-transcript-extractor](https://github.com/GregHabiskis/youtube-transcript-extractor): describes yt-dlp captions-only collection, creator-caption preference, JSON3/VTT/SRT parsing, rolling-caption cleanup and timestamps. GitHub metadata showed no declared license; pyproject requires Python 3.14, while our package targets Python 3.11+. **Borrow design only; do not copy or depend on it.**
+2. [analyze-video](https://github.com/eruto-skills/analyze-video): MIT; skill describes full-transcript macro/micro structure, hook, information density, hedging, credibility, re-engagement, memorable phrasing, contrast and closing, with unscored evidence-led comparison. **Borrow analytical design; no runtime dependency.**
+3. [youtube-transcriber](https://github.com/nickholdenproper/youtube-transcriber): Python CLI/GUI/API; captions, local Whisper fallback, Ollama analysis, optional visual/voice passes. Its custom Free-to-Use License is not a permissive OSI license; audio fallback downloads media and cloud Ollama conflicts with our initial constraints. **Borrow architecture ideas only; do not adopt or copy code.**
+
+Full findings and links are in `docs/experiments/transcript_tools_reconnaissance.md`.
+
+### Analysis principles agreed
+
+- Use a **multi-label** content-format taxonomy: documentary, mystery/reveal, investigative, educational explainer, narrative essay, case study, tutorial/demo, listicle, commentary, interview, review/comparison, news, personal story, compilation/reaction, mixed/other.
+- Also identify narrative mode separately: chronological, question-led, problem-solution, claim-evidence, thematic, episodic, list-based, etc.
+- Keep three pacing concepts separate: speech rate (WPM), information density (new concepts/claims), and narrative pace (frequency of section/question/story-beat changes).
+- Caption timestamps can be coarse or unreliable; report method and quality caveats. Transcript alone cannot establish visual editing pace, cuts, music, silence, vocal energy, retention, CTR or causal performance effects.
+- Every claim about a hook, structure, moment or technique needs timestamp evidence.
+- Separate observation, interpretation and hypothesis. No invented content and no opaque quality score.
+- Compare individual reports only after a small batch exists; compare like with like (topic, format, duration, caption quality, publication age). Small samples yield hypotheses, not universal truths.
+
+### Constraints unchanged
+
+- No paid LLM API calls.
+- No video/audio downloads in the first pass.
+- No cookies, account sessions, proxies, proxy rotation, CAPTCHA bypasses or access-control workarounds.
+- Bounded sequential requests, caching, zero retries initially; stop on 403/429/challenge.
+- No full transcripts or private run artefacts in this public repository.
+- Do not introduce Whisper, Ollama, embeddings, a database, MCP runtime or new UI in this design phase.
+- Preserve the existing Python MVP and all earlier research explorer/layout work.
+
+### Next engineering steps
+
+1. Update `docs/experiments/transcript_collection.md` to link reconnaissance and record the selected first spike: yt-dlp subtitle-only adapter, subject to a bounded local test and current policy review.
+2. Inspect existing `pyproject.toml`, contracts and CLI before implementation. Propose a minimal `TranscriptObservation` / `TranscriptSegment` contract that can represent retrieved, no-captions, unavailable, blocked and failed states.
+3. Build a captions-only adapter with deterministic tests using synthetic VTT/JSON3 fixtures; never require live YouTube for unit tests.
+4. Add a manual, bounded real-data experiment against a few selected satellite videos only after local tests pass. Record track availability, caption type, language, timestamps, coverage, errors and stop conditions; keep raw transcript output private.
+5. Validate transcript quality checks and report output. Only then run a human/model-assisted analysis pilot on 3–5 videos and revise the rubric from user feedback.
+6. Update module README, root README and this handoff in every material PR. Keep branch/PR/commit/test/experiment status explicit.
+
+**Next chat must start from this section and inspect the branch.** Do not claim this branch is merged or that transcript acquisition/analysis is working until code, tests and a bounded experiment establish that.

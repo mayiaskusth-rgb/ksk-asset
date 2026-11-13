@@ -1,0 +1,19 @@
+{
+  "name": "ksk-research-api",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate:local": "wrangler d1 migrations apply ksk-research-dev --local",
+    "db:migrate:remote": "wrangler d1 migrations apply ksk-research-dev --remote",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.8.0",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.5",
+    "wrangler": "^4.0.0"
+  }
+}

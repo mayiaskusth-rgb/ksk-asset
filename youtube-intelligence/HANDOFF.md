@@ -2,7 +2,7 @@
 
 **Purpose:** This is the authoritative product and engineering handoff for the independent YouTube research module in this repository. A new ChatGPT engineering chat should read this file and the current code before making changes.
 
-**Start command for the next chat:** “Read the handoff and current branch/PR state. Continue the transcript intelligence foundation from the latest dated handoff section; do not restart completed UI work or assume transcript collection is implemented.”
+**Start command for the next chat:** “Read this handoff, the root README, cloudflare/README.md, and the live GitHub PR/Actions state before doing anything. Continue from the latest 2026-11-14 persistence checkpoint. The user wants a concise close-out, is Android-only, and explicitly said STOP before requesting documentation updates. Do not merge, deploy, migrate the remote database, or make other GitHub changes without fresh explicit approval. Do not ask for card details or local shell commands.”
 
 **Repository:** [mayiaskusth-rgb/ksk-asset](https://github.com/mayiaskusth-rgb/ksk-asset)  
 **Module:** `youtube-intelligence/`  
@@ -742,3 +742,79 @@ Current implementation is on draft PR [#14](https://github.com/mayiaskusth-rgb/k
 - Do not merge either PR or deploy without explicit owner approval. Next engineering gate: settle a secure owner-only auth mechanism compatible with the account constraints, then add authenticated Worker endpoint tests and complete the one-video/manual-transcript round trip against development D1.
 
 The owner is using an Android phone and should not be asked to run local shell commands. Keep future owner steps short and dashboard-based only when essential.
+
+
+---
+
+## 22. Next-chat handoff and current stop point — 2026-11-14
+
+This section supersedes older status notes above wherever they conflict. Historical implementation notes remain for context.
+
+### User's immediate request and boundaries
+
+The user said the current chat had become too large and asked for the README and a handoff document to make the next chat efficient. They then explicitly said **“Stop.”** No merge, deployment, migration, or further implementation was authorised by that stop. The user subsequently requested only documentation updates.
+
+- User currently has only an Android phone. Do not ask them to run terminal, Node, Wrangler, Python, or local shell commands.
+- User declined the Cloudflare Zero Trust card-details prompt. Never ask for card details or suggest entering them.
+- Never ask the user to paste account tokens, passwords, API keys, or secrets into chat.
+- Do not imply background work continues after a response.
+- Keep responses short, action-oriented, and distinguish verified facts from pending work.
+- Do not merge or deploy without fresh explicit approval.
+
+### Current GitHub state at last live check
+
+Repository: [mayiaskusth-rgb/ksk-asset](https://github.com/mayiaskusth-rgb/ksk-asset)
+
+| Item | State |
+|---|---|
+| PR [#14](https://github.com/mayiaskusth-rgb/ksk-asset/pull/14) — Worker API | Open, draft, base main, head `091d47b76272129e71f5e1ff4080641ec0844fe4`; mergeable at last check |
+| PR [#16](https://github.com/mayiaskusth-rgb/ksk-asset/pull/16) — local D1 tests | Open, draft, base feat/cloudflare-first-persistence-api, head `c5afaf634a26f028896e959eabd5701e4f063af0`; GitHub reported dirty/non-mergeable at last check |
+| PR #14 Cloudflare API CI | Passed on head `091d47b76272129e71f5e1ff4080641ec0844fe4`, run [43490773049](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43490773049) |
+| PR #14 Python CI | Passed on same head, run [43490773042](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43490773042) |
+| PR #16 CI | No run for its latest head `c5afaf6...` was visible at last check. Older run [43490809184](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43490809184) failed on older SHA `2b3d926...`; do not treat that as a result for the later fix. |
+
+The last GitHub status check was performed immediately before the user said “Stop.” Re-check live state before giving a new status. Do not merge PR #14 or #16.
+
+### What is implemented
+
+- Worker routes: GET /health, POST /api/videos, GET /api/videos/{video_id}, and POST /api/videos/{video_id}/transcripts.
+- Canonical video upsert and project membership; default project seeded by migration.
+- Manual transcript save/retrieval with SHA-256 duplicate detection and revision history.
+- Same content as the latest revision is idempotent; changed content creates the next revision; restoring older content creates a new revision.
+- Transcript body limit 512 KiB; API responses no-store.
+- Private routes currently validate Cloudflare Access JWT signature, issuer, audience and expiry.
+- PR #16 adds local D1 contract tests for video/project membership, transcript revision retention/uniqueness, foreign-key enforcement and append-only review events. Its Vitest D1 migration setup fix is committed but unverified on CI.
+
+### What is not done
+
+- No secure owner-only auth path has been selected that avoids the Access onboarding/payment obstacle.
+- No Cloudflare Access application/policy exists; Access vars remain placeholders.
+- No CI proof for the latest PR #16 head.
+- No authenticated Worker endpoint success tests.
+- No remote D1 migration, Worker deployment, or real save/retrieve/revision test.
+- No mobile browser test or Pages frontend integration.
+- No transcript text has been uploaded to D1.
+- No bulk import, automated transcript fallback, analysis endpoint or persistence UI has been built.
+
+### Cloudflare development database
+
+Owner-created D1 database:
+- Name: `ksk-research-dev`
+- ID: `31c27fa9-cd26-4ac2-867d-710096093dad`
+
+The ID is not a credential. The database exists, but remote schema migration and live API operation are not verified.
+
+### Next engineering sequence — keep it narrow
+
+1. Check current PR #16 head and Actions. Diagnose and fix its Vitest D1 migration harness until CI passes on the exact latest head.
+2. Resolve secure single-owner authentication without asking for payment details. Fail closed if secret/configuration is missing. Never add an auth bypass for tests or production.
+3. Add tests for authenticated success and unauthenticated rejection; exercise video and transcript save/retrieve/revision behavior locally.
+4. Update this handoff and READMEs with exact verification evidence.
+5. Present the owner with one phone-friendly dashboard action at a time. Ask for explicit approval before remote migration or deployment.
+6. First live experiment remains one canonical video + one manually pasted transcript + retrieval + revision check. Stop after that and review.
+
+Do not broaden scope. Do not start automated transcript extraction again: both the yt-dlp probe and the separate youtube-transcript-api diagnostic were blocked by YouTube access challenges on GitHub-hosted runners. Manual browser paste remains the planned first persistence test.
+
+### Instructions for the next chat
+
+Begin by checking the latest PRs and Actions; do not rely on old run statuses. Then continue only with the narrow engineering sequence above. The user's latest authorised work was documentation only. If the user asks to proceed with implementation, continue in small increments and do not merge or deploy without explicit approval.

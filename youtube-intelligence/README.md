@@ -77,7 +77,11 @@ A views-to-subscriber ratio is a separate metric from creator-relative outlier s
 - `.github/workflows/python-tests.yml` — test suite on pushes and pull requests.
 - [`HANDOFF.md`](HANDOFF.md) — complete product vision, architecture, data-source constraints, development expectations, and next-chat instructions.
 
-## Bounded transcript experiment\n\nThe first live test is deliberately limited to one long-form satellite result (59:14); a second (48:17) is optional. Run it from GitHub Actions → **Satellite transcript probe** after the workflow is merged to `main`. Only a sanitized status/metadata report is uploaded; transcript text is never published as an artifact. See [the experiment protocol](docs/experiments/transcript_collection.md).\n\n## Transcript intelligence design
+## Bounded transcript experiment
+
+The first live test is deliberately limited to one long-form satellite result (59:14); a second (48:17) is optional. Run it from GitHub Actions → **Satellite transcript probe** after the workflow is merged to `main`. Only a sanitized status/metadata report is uploaded; transcript text is never published as an artifact. See [the experiment protocol](docs/experiments/transcript_collection.md).
+
+## Transcript intelligence design
 
 Read these before implementing transcript work:
 - [Transcript collection design](docs/experiments/transcript_collection.md) — captions-only acquisition, provenance, status handling and safety boundaries.
@@ -104,7 +108,7 @@ The intended analysis covers concepts, multi-label content format, narrative mod
 13. [ ] Reliability improvements: caching, retries, logging, quota/cost controls, and versioned reports.
 14. [ ] Consider a dashboard only after the CLI research engine is reliable.
 
-**Immediate next work:** merge the bounded probe workflow, run the default one-video experiment, review the sanitized result, then optionally test the second video. Fix extraction issues before selecting/building the analyser. Do not expand to the full 47-video set yet.
+**Immediate next work:** establish private persistence with one manually supplied video and transcript. The two GitHub-hosted transcript extraction approaches have already been tested and blocked; do not repeat them or expand to bulk collection. Once persistence works, use one transcript to test analysis.
 
 
 ## Transcript access diagnostic

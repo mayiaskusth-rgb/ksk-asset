@@ -1,0 +1,47 @@
+[
+  {
+    "video_id": "demo001",
+    "title": "Why Barcodes Have 13 Digits",
+    "channel_name": "Everyday Systems Lab",
+    "format": "long_form",
+    "views": 120000,
+    "creator_baseline_median_views": 20000,
+    "baseline_sample_size": 10
+  },
+  {
+    "video_id": "demo002",
+    "title": "The History of the Barcode",
+    "channel_name": "Everyday Systems Lab",
+    "format": "long_form",
+    "views": 36000,
+    "creator_baseline_median_views": 20000,
+    "baseline_sample_size": 10
+  },
+  {
+    "video_id": "demo003",
+    "title": "Barcode Scanner Test",
+    "channel_name": "Everyday Systems Lab",
+    "format": "long_form",
+    "views": 18000,
+    "creator_baseline_median_views": 20000,
+    "baseline_sample_size": 10
+  },
+  {
+    "video_id": "demo004",
+    "title": "Shorts: Barcode Beep",
+    "channel_name": "Everyday Systems Lab",
+    "format": "short_form",
+    "views": 50000,
+    "creator_baseline_median_views": 10000,
+    "baseline_sample_size": 3
+  },
+  {
+    "video_id": "demo005",
+    "title": "How Checkout Scanners Work",
+    "channel_name": "Retail Explained",
+    "format": "long_form",
+    "views": 90000,
+    "creator_baseline_median_views": 0,
+    "baseline_sample_size": 8
+  }
+]

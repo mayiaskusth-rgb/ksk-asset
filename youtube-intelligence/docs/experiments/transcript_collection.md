@@ -60,3 +60,15 @@ Use it as a separately selectable adapter after a small test. Do not build the s
 - Unit tests use synthetic subtitle fixtures and cover rolling-caption duplication, cue overlap, empty captions, malformed timestamps, Unicode, missing language and unavailable-track states.
 - The live experiment is a small sequential sample of already-selected satellite videos, not a broad channel crawl. Cache each result and stop on access challenges or rate limits.
 - The first pass does not run speech-to-text fallback. If captions are unavailable, record that honestly; do not download audio to fill the gap.
+
+
+## Implementation status update (2026-11-13)
+
+The first local normalization slice is now implemented on draft PR #11 in `src/yti/transcripts.py`:
+- provider-neutral transcript observation and segment records;
+- deterministic WebVTT and JSON3 parsers;
+- normalized-content checksum;
+- explicit no-captions state for empty parsed content;
+- synthetic tests, with no network dependency.
+
+This is not yet a YouTube collector. Track discovery, caption selection, retrieval, error mapping, caching and live satellite sampling remain future work. See the latest dated section in `HANDOFF.md`.

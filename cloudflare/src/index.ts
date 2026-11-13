@@ -152,22 +152,28 @@ export default {
       const language = typeof body.language_code === "string" ? body.language_code.slice(0, 20) : null;
       const checksum = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(content));
       const hash = Array.from(new Uint8Array(checksum), (b) => b.toString(16).padStart(2, "0")).join("");
-      const latest = await env.DB.prepare(
-        "SELECT transcript_id, revision, content_sha256 FROM transcripts WHERE video_id = ? ORDER BY revision DESC LIMIT 1",
-      ).bind(transcriptMatch[1]).first<{ transcript_id: string; revision: number; content_sha256: string }>();
-      if (latest?.content_sha256 === hash) {
-        return json({ transcript_id: latest.transcript_id, revision: latest.revision, unchanged: true });
-      }
-      const transcriptId = crypto.randomUUID();
       try {
+        const latest = await env.DB.prepare(
+          "SELECT transcript_id, revision, content_sha256 FROM transcripts WHERE video_id = ? ORDER BY revision DESC LIMIT 1",
+        ).bind(transcriptMatch[1]).first<{ transcript_id: string; revision: number; content_sha256: string | null }>();
+        if (latest) {
+          if (latest.content_sha256 === hash) {
+            return json({ transcript_id: latest.transcript_id, revision: latest.revision, unchanged: true, updated: false });
+          }
+          await env.DB.prepare(`UPDATE transcripts
+            SET status = 'available', source_type = 'manual', source_provider = 'manual_paste',
+                language_code = ?, caption_type = 'unknown', content_text = ?, content_sha256 = ?,
+                retrieved_at = CURRENT_TIMESTAMP
+            WHERE transcript_id = ?`)
+            .bind(language, content, hash, latest.transcript_id).run();
+          return json({ transcript_id: latest.transcript_id, revision: latest.revision, unchanged: false, updated: true });
+        }
+        const transcriptId = crypto.randomUUID();
         await env.DB.prepare(`INSERT INTO transcripts
           (transcript_id, video_id, revision, status, source_type, source_provider, language_code, caption_type, content_text, content_sha256)
-          VALUES (?, ?, (SELECT COALESCE(MAX(revision), 0) + 1 FROM transcripts WHERE video_id = ?),
-            'available', 'manual', 'manual_paste', ?, 'unknown', ?, ?)`)
-          .bind(transcriptId, transcriptMatch[1], transcriptMatch[1], language, content, hash).run();
-        const saved = await env.DB.prepare("SELECT transcript_id, revision FROM transcripts WHERE transcript_id = ?")
-          .bind(transcriptId).first<{ transcript_id: string; revision: number }>();
-        return json(saved ?? { transcript_id: transcriptId }, 201);
+          VALUES (?, ?, 1, 'available', 'manual', 'manual_paste', ?, 'unknown', ?, ?)`)
+          .bind(transcriptId, transcriptMatch[1], language, content, hash).run();
+        return json({ transcript_id: transcriptId, revision: 1, unchanged: false, updated: false }, 201);
       } catch {
         return json({ error: "could_not_save_transcript_video_must_exist_first" }, 400);
       }
@@ -178,9 +184,9 @@ export default {
       const video = await env.DB.prepare("SELECT video_id, canonical_url, title, channel_name, created_at, updated_at FROM videos WHERE video_id = ?")
         .bind(videoMatch[1]).first();
       if (!video) return json({ error: "not_found" }, 404);
-      const transcripts = await env.DB.prepare(`SELECT transcript_id, revision, status, source_type, language_code, caption_type, content_text, content_sha256, created_at
-        FROM transcripts WHERE video_id = ? ORDER BY revision DESC`).bind(videoMatch[1]).all();
-      return json({ video, transcripts: transcripts.results });
+      const transcript = await env.DB.prepare(`SELECT transcript_id, revision, status, source_type, language_code, caption_type, content_text, content_sha256, created_at
+        FROM transcripts WHERE video_id = ? ORDER BY revision DESC LIMIT 1`).bind(videoMatch[1]).first();
+      return json({ video, transcripts: transcript ? [transcript] : [] });
     }
 
     return json({ error: "not_found" }, 404);

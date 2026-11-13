@@ -61,7 +61,7 @@ describe("KSK private research API", () => {
     expect(await blocked.json()).toMatchObject({ error: "too_many_login_attempts" });
   });
 
-  it("saves, deduplicates, versions, and retrieves transcripts through authenticated Worker routes", async () => {
+  it("saves, edits in place, deduplicates, and retrieves one current transcript", async () => {
     const videoId = "efjBiVN_N3M";
     const videoResponse = await authenticatedFetch("/api/videos", {
       method: "POST", body: JSON.stringify({ video_id: videoId, title: "Integration test video", channel_name: "KSK Tests" }),
@@ -82,21 +82,19 @@ describe("KSK private research API", () => {
     expect(duplicateResponse.status).toBe(200);
     expect(await duplicateResponse.json()).toMatchObject({ transcript_id: first.transcript_id, revision: 1, unchanged: true });
 
-    const secondText = "This is the edited transcript with a correction.";
-    const secondResponse = await authenticatedFetch(`/api/videos/${videoId}/transcripts`, {
-      method: "POST", body: JSON.stringify({ content_text: secondText, language_code: "en" }),
+    const editedText = "This is the edited transcript with a correction.";
+    const editResponse = await authenticatedFetch(`/api/videos/${videoId}/transcripts`, {
+      method: "POST", body: JSON.stringify({ content_text: editedText, language_code: "en" }),
     });
-    expect(secondResponse.status).toBe(201);
-    expect(await secondResponse.json()).toMatchObject({ revision: 2 });
+    expect(editResponse.status).toBe(200);
+    expect(await editResponse.json()).toMatchObject({ transcript_id: first.transcript_id, revision: 1, updated: true });
 
     const readResponse = await authenticatedFetch(`/api/videos/${videoId}`);
     expect(readResponse.status).toBe(200);
     const saved = await readResponse.json() as { video: { video_id: string; title: string }; transcripts: Array<{ revision: number; content_text: string; language_code: string }> };
     expect(saved.video).toMatchObject({ video_id: videoId, title: "Integration test video" });
-    expect(saved.transcripts).toHaveLength(2);
-    expect(saved.transcripts.map((transcript) => transcript.revision)).toEqual([2, 1]);
-    expect(saved.transcripts[0]).toMatchObject({ content_text: secondText, language_code: "en" });
-    expect(saved.transcripts[1]).toMatchObject({ content_text: firstText, language_code: "en" });
+    expect(saved.transcripts).toHaveLength(1);
+    expect(saved.transcripts[0]).toMatchObject({ revision: 1, content_text: editedText, language_code: "en" });
   });
 
   it("rejects a session token with a modified signature", async () => {

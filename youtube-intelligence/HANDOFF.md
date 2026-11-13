@@ -6,7 +6,7 @@
 
 **Repository:** [mayiaskusth-rgb/ksk-asset](https://github.com/mayiaskusth-rgb/ksk-asset)  
 **Module:** `youtube-intelligence/`  
-**Status:** Existing Python MVP; further development not yet started from this handoff.
+**Status:** Existing Python MVP preserved. Iteration 0 foundation is in progress on `work/youtube-intelligence-iteration-0`; see the module README and `docs/` for the branch deliverables.
 
 ---
 
@@ -123,11 +123,13 @@ Current known files:
 - `youtube-intelligence/README.md`
 - `youtube-intelligence/pyproject.toml`
 - `youtube-intelligence/src/yti/__init__.py`
+- `youtube-intelligence/src/yti/contracts.py` (added in Iteration 0; provider-neutral records, additive and not yet wired into the CLI)
 - `youtube-intelligence/src/yti/scoring.py`
 - `youtube-intelligence/src/yti/io.py`
 - `youtube-intelligence/src/yti/report.py`
 - `youtube-intelligence/src/yti/cli.py`
 - `youtube-intelligence/data/sample_videos.json`
+- `youtube-intelligence/tests/test_contracts.py` (added in Iteration 0)
 - `youtube-intelligence/tests/test_scoring.py`
 - `youtube-intelligence/tests/test_cli.py`
 - `youtube-intelligence/.github/workflows/python-tests.yml`
@@ -327,10 +329,15 @@ Prefer small, composable dependencies over adopting a large application wholesal
 
 ### Minimum Iteration 0 outputs
 
+- `docs/architecture.md` — module boundaries, provider strategy, persistence and quality constraints.
+- `docs/data_contracts.md` plus `src/yti/contracts.py` — normalized records and provenance requirements.
+- `docs/scoring_methodology.md` — preserved MVP bands and comparability requirements.
 - `docs/repo_landscape.md` — reviewed GitHub projects, category coverage, findings, and reuse decisions.
-- `docs/tooling_landscape.md` — relevant hosted tools/extensions/MCP services, free-tier limits, and comparison with open-source options.
-- An explicit **build vs reuse** decision for each major capability.
-- A short list of candidate libraries/projects for isolated technical spikes in later iterations.
+- `docs/tooling_landscape.md` — hosted tools/extensions/MCP services, plan constraints, and comparison with open-source options.
+- `tests/test_contracts.py` — deterministic contract validation tests.
+- An explicit **build vs reuse** decision for each major capability and a shortlist of technical spikes.
+
+**Iteration 0 branch status (2026-11-13):** The above documents and additive contracts are present on `work/youtube-intelligence-iteration-0`. The existing scoring, IO, report, CLI, fixtures and CI workflow are unchanged. CI execution on the feature branch is still required before Iteration 0 can be marked complete.
 
 The initial scan should be broad enough to avoid tunnel vision, then narrow to a small shortlist for deeper code/license review. Aim to inspect a meaningful spread of candidates across all eight categories; do not pad the inventory with irrelevant repositories just to hit a number.
 
@@ -423,7 +430,7 @@ No dashboard-first approach. No manual-search substitution. No invented metrics.
 **Go. Read this handoff and inspect the current repository. Start Iteration 0.**
 
 Specifically:
-1. Inspect the current `main` branch and the existing `youtube-intelligence/` implementation.
+1. Inspect the current `main` branch and the existing `youtube-intelligence/` implementation; create a dedicated feature branch.
 2. Confirm the actual repository state, tests, CI, and current scoring behavior.
 3. Investigate relevant outlier extensions/tools and open-source MCP or Python projects.
 4. Identify what can be reused and what should remain our own implementation.

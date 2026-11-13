@@ -47,8 +47,15 @@ async function createAccessToken(): Promise<string> {
 
 async function authenticatedFetch(path: string, init: RequestInit = {}): Promise<Response> {
   const headers = new Headers(init.headers);
-  headers.set("cf-access-jwt-assertion", authorization);
-  return worker.fetch(new Request(`https://worker.test${path}`, { ...init, headers }), env);
+  const request = {
+    url: `https://worker.test${path}`,
+    method: init.method ?? "GET",
+    headers: {
+      get: (name: string) => name.toLowerCase() === "cf-access-jwt-assertion" ? authorization : headers.get(name),
+    },
+    text: async () => typeof init.body === "string" ? init.body : "",
+  } as unknown as Request;
+  return worker.fetch(request, env);
 }
 
 describe("KSK private research API", () => {

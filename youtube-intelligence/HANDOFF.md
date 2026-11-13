@@ -620,3 +620,8 @@ The next run exposed a second literal escaped-newline typo in the new adapter te
 
 
 The regional-language test then exposed that the intended helper replacement had not actually applied; the old fallback remained. The helper was replaced explicitly in commit `ddcf55679ae14880ea085f56a07ffbca046b3b2c`. Verify the next CI run before proceeding. This was a test-detected behavior bug: explicit regional requests could have fallen back to a different region, which is now intended to be disallowed.
+
+
+### Verification after adapter hardening — 2026-11-13
+
+GitHub Actions run [43460851620](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43460851620) completed successfully on code commit `ddcf55679ae14880ea085f56a07ffbca046b3b2c`: **34 tests passed**, and the existing sample scoring/report pipeline completed. This includes strict regional-language selection and single-video mode. The later handoff-only commit `bd1b6516d0ec8cc7d9742d41835c7abf917f9942` records the verification; no code changed after the successful run.

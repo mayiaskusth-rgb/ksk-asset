@@ -532,3 +532,32 @@ The adapter and mocked unit tests are implemented. **No live YouTube extraction 
 Run the bounded probe once in the user's local environment. Evaluate query success/failure, relevant-result rate, unique videos, cross-query duplicates, metadata completeness, and stop reason. Do not expand volume, collect channel histories, or retrieve transcripts until this first search stage is reviewed. If any access restriction is encountered, stop and document it; do not retry or evade it.
 
 This no-API probe is an experimental source adapter. Keep the existing scoring MVP and all provider-neutral contracts intact. The official YouTube API can be implemented later as a separate adapter without changing downstream contracts.
+
+## 15. Research Run Explorer and transcript/analysis workflow (2026-11-13)
+
+The public repository's existing root `index.html` is the KSK Visual Asset Library. Do not replace it. The additive `research.html` is a separate static YouTube Research Run Explorer, linked from the asset gallery. Both are deployed by the existing GitHub Pages workflow.
+
+### Explorer implementation
+- `research.html` loads `research-runs/index.json` and a selected run JSON file.
+- `research-runs/satellite-43436550833.json` is the first public-safe run fixture, copied from GitHub Actions run 43436550833 / artifact 14043943457.
+- It records 10 search phrases, 50 result slots and 47 unique videos, with per-query rank preserved and cross-query duplicates visible.
+- UI supports run selection, query selection, filtering, sorting, metadata inspection, direct YouTube links and an opt-in embedded player.
+- Transcript and analysis sections must remain explicitly marked as not collected/not analysed until real artefacts exist.
+- Future run outputs should be added as separate JSON files and registered in `research-runs/index.json`. Do not store full transcripts or private data in this public repository.
+
+### Video analysis instruction contract
+- `docs/agents/VIDEO_ANALYSIS_AGENT.md` (under `youtube-intelligence/`) is a versioned, human/model-followed analysis rubric, not an autonomous paid-API agent.
+- Follow it when analysing supplied transcripts. Require timestamps for claims about hooks, structure and moments; distinguish observation, interpretation and hypothesis; never infer retention or causality from public metadata.
+- Refine only through versioned changes informed by the user's review.
+
+### Transcript collection direction
+- First candidate adapter: extend yt-dlp to inspect and retrieve available creator-provided or auto-generated captions without downloading video/audio (`--list-subs`, `--write-subs`, `--write-auto-subs`, `--skip-download`, language selection).
+- Compare with the open-source `youtube-transcript-api` adapter on a small bounded sample; it may be blocked/rate-limited because it relies on YouTube web interfaces.
+- Design and safety rules: `docs/experiments/transcript_collection.md`.
+- Preserve language, caption type, timestamps, source/version, retrieval time and explicit unavailable/blocked states. No cookies, proxies, CAPTCHA bypasses, retries or media downloads in the first pass.
+- Never fabricate missing transcripts. Keep full transcript artefacts out of this public repository.
+
+### Known explorer data gaps
+- Upload dates were unavailable in the first run.
+- Channel IDs are intentionally omitted from the public display fixture; raw workflow artifact retains the full extractor output for seven days.
+- The current fixture is a snapshot; it does not establish view velocity or historical performance.

@@ -2,6 +2,7 @@ interface Env {
   DB: D1Database;
   OWNER_PASSWORD?: string;
   SESSION_SECRET?: string;
+  LOGIN_RATE_LIMITER: RateLimit;
 }
 const APP_ORIGIN = "https://mayiaskusth-rgb.github.io";
 
@@ -99,6 +100,9 @@ export default {
 
     if (url.pathname === "/api/auth/login" && request.method === "POST") {
       if (request.headers.get("Origin") !== APP_ORIGIN) return json({ error: "forbidden_origin" }, 403);
+      const clientKey = request.headers.get("cf-connecting-ip") ?? "unknown";
+      const rate = await env.LOGIN_RATE_LIMITER.limit({ key: clientKey });
+      if (!rate.success) return json({ error: "too_many_login_attempts" }, 429);
       if (!env.OWNER_PASSWORD || !env.SESSION_SECRET || env.SESSION_SECRET.length < 32) {
         return json({ error: "authentication_not_configured" }, 503);
       }

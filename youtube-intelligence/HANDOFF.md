@@ -687,3 +687,16 @@ Safeguards: no cookies, browser sessions, proxies, CAPTCHA workarounds, media do
 ### Next action
 
 Review diagnostic branch CI. If it passes, merge only after review, then manually run the separate workflow once with norsat-webinar. Inspect the sanitized artifact before deciding anything further. Do not run the second sample or bulk collection yet. Do not start transcript analysis until acquisition is demonstrated on real caption data.
+
+## Cloudflare persistence foundation — 2026-11-13
+
+A separate infrastructure proposal is being developed in the repository under `cloudflare/`. It does not replace GitHub or GitHub Pages and must not deploy the repository root as a Worker.
+
+- `cloudflare/README.md` defines the intended split: GitHub for code/versioning, GitHub Pages for the static UI, Cloudflare Workers for an authenticated API, D1 for private structured persistence, and Python/GitHub Actions for analysis jobs.
+- `cloudflare/schema.sql` proposes D1 entities for projects, research runs, canonical videos, project-video membership/review decisions, discovery provenance, transcript revisions, human notes, analysis runs and findings.
+- `cloudflare/DATA_MODEL.md` defines Keep / Drop / Review later semantics. Drop excludes a video from further processing but never deletes its record. Manual video links enter the same lifecycle.
+- First implementation gate: one canonical video and a manually pasted transcript can be saved and retrieved; revisions are retained; unauthenticated read/write requests fail.
+- Keep the first test limited to one video. Do not add bulk imports, analysis UI, or automated provider fallback yet.
+- No Worker code, D1 database, Access policy, secret, or Cloudflare deployment has been created at this design stage. The Cloudflare account owner must authorize initial resource creation and secret configuration.
+
+The current extraction experiment is complete enough to pause: the yt-dlp and separate youtube-transcript-api GitHub-hosted tests both encountered YouTube access challenges. This does not prove all networks or hosted providers are blocked. The immediate practical path is manual transcript input with private persistence.

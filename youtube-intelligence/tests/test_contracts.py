@@ -32,8 +32,18 @@ def test_video_observation_rejects_negative_counts():
         VideoObservation(
             video_id="abc123", title="Title", channel_id="c1",
             channel_title="Channel", published_at=None, duration_seconds=10,
-            format="short_form", views=-1, observed_at="now",
-            source=SourceReference("fixture", "now", "test"),
+            format="short_form", views=-1, observed_at="2026-11-13T10:00:00Z",
+            source=SourceReference("fixture", "2026-11-13T10:00:00Z", "test"),
+        )
+
+
+def test_video_observation_requires_timezone_aware_observation_time():
+    with pytest.raises(ValueError, match="timezone"):
+        VideoObservation(
+            video_id="abc123", title="Title", channel_id="c1",
+            channel_title="Channel", published_at=None, duration_seconds=10,
+            format="short_form", views=1, observed_at="2026-11-13T10:00:00",
+            source=SourceReference("fixture", "2026-11-13T10:00:00Z", "test"),
         )
 
 
@@ -70,5 +80,17 @@ def test_creator_baseline_rejects_duplicate_comparison_videos():
             format="long_form",
             median_views=5000,
             sample_video_ids=("peer-1", "peer-1"),
+            computed_at="2026-11-13T10:00:00Z",
+        )
+
+
+def test_creator_baseline_rejects_non_finite_median():
+    with pytest.raises(ValueError, match="finite"):
+        CreatorBaseline(
+            candidate_video_id="candidate",
+            channel_id="channel-1",
+            format="long_form",
+            median_views=float("nan"),
+            sample_video_ids=("peer-1",),
             computed_at="2026-11-13T10:00:00Z",
         )

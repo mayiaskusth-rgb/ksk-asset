@@ -1,73 +1,48 @@
 # KSK Cloudflare Persistence
 
-This directory defines the backend foundation for the YouTube Research Explorer. It is deliberately separate from the existing GitHub Pages frontend and from the Python research engine.
+Small private API for the YouTube Research Explorer. GitHub remains the code/versioning source; GitHub Pages remains the static frontend; Python/GitHub Actions remain the research/analysis runtime. This Worker is deployed only from this directory.
 
-## Responsibilities
+## First API slice
 
-- **GitHub** remains the source of truth for code, reviews, versioning, tests and deployment configuration.
-- **GitHub Pages** continues to host the existing static Research Explorer and asset gallery.
-- **Cloudflare Workers** will expose a small authenticated API.
-- **Cloudflare D1** will persist projects, research runs, canonical video records, review decisions, transcripts, notes and analysis results.
-- **Python / GitHub Actions** will fetch saved transcript content through the API when analysis runs, then write structured findings back.
+- `GET /health`: non-sensitive liveness response.
+- `POST /api/videos`: create/update a canonical YouTube video and link it to the default project (or supplied project ID).
+- `GET /api/videos/{video_id}`: return video metadata and transcript revisions, newest first.
+- `POST /api/videos/{video_id}/transcripts`: save a manual transcript. Identical content is idempotent; changed content creates a new revision.
 
-Cloudflare is a runtime and persistence layer, not a replacement for GitHub repositories.
+All private routes validate the Cloudflare Access JWT signature, issuer, audience and expiry. CORS is intentionally not enabled yet; the first test uses an API client through Access, before connecting the public Pages frontend. Transcript bodies are limited to 512 KiB. API responses are marked no-store.
 
-## Safety boundary
+## Local development
 
-Do not connect the existing repository root to a generic Worker deployment. The current repository contains the public static website and its Pages workflow. The Worker must be deployed from this dedicated directory with its own Wrangler configuration and entry point.
+Requires Node.js 20+ and Wrangler 4.
 
-Never put API secrets, Cloudflare account tokens, Access service tokens, private transcripts or user notes in this public repository.
+```sh
+cd cloudflare
+npm install
+npm run db:migrate:local
+npm test
+npm run dev
+```
 
-The API must be protected before any write or private read endpoint is exposed. Preferred initial browser access is Cloudflare Access in front of a dedicated API hostname, with Worker-side authorization checks. The browser must use the Access-supported login/session flow for cross-origin API calls; verify cookie and CORS behaviour in a real mobile-browser test before integrating the public Pages UI. CORS is not authentication. Do not rely on an unguessable URL or a secret embedded in frontend JavaScript. The first deployment is single-user/private; do not assume the schema is ready for multiple independent users or tenants.
+Wrangler configuration has a harmless placeholder D1 UUID and placeholder Access settings. Replace them only after creating the development D1 database and Access application. Do not deploy with placeholder settings. The local tests cover liveness, rejection of unauthenticated private requests and migration seeding. The authenticated save/retrieve/revision flow is the first development-D1 integration check after account setup.
 
-## Data model
+## Cloudflare setup (owner action)
 
-The first schema is in [schema.sql](schema.sql). It is designed for the intended lifecycle, but the first implementation/test will use only a narrow subset:
+1. Create a D1 database named `ksk-research-dev`.
+2. Replace the database ID in `wrangler.toml`.
+3. Create a Cloudflare Access self-hosted application for the Worker hostname; restrict it to the owner's email.
+4. Set `ACCESS_TEAM_DOMAIN` and `ACCESS_AUD` from the Access setup.
+5. Apply the migration to the development database and deploy from this directory only.
 
-1. Create or retrieve one canonical video record by YouTube video ID.
-2. Save a manually pasted transcript with source and language metadata.
-3. Retrieve that transcript from a separate client.
-4. Update the transcript without duplicating the canonical video.
-5. Confirm that unauthorized requests are rejected.
+No account token, Access secret, transcript or private note belongs in Git. Access JWT validation happens in the Worker as a second enforcement layer; do not expose the Worker API without an Access application and matching audience configured.
 
-The schema also reserves structures for multiple projects, research runs, discovery provenance, Keep / Drop / Review decisions, human notes, analysis runs and evidence-backed findings. Those features are not part of the first persistence test.
+## First manual API experiment
 
-## Video lifecycle decisions
+After the development Worker is deployed behind Access, use an authenticated API client/browser session to:
+1. POST one video ID to `/api/videos`.
+2. POST a manually copied transcript to `/api/videos/{id}/transcripts`.
+3. GET `/api/videos/{id}` and verify revision 1 is present.
+4. POST the same transcript again and verify it returns the same revision (no duplicate).
+5. POST a corrected transcript and verify revision 2 appears.
+6. Repeat a private GET without an Access token and verify HTTP 401.
 
-A review decision is not deletion. 'keep', 'drop' and 'review_later' are reversible states. Dropped videos remain available for audit and can be restored. The reason and reviewer note are stored separately from machine-generated analysis.
-
-Manual additions use added_via = 'manual' and enter the same video lifecycle as discovered results.
-
-A canonical video is keyed by YouTube video ID. Project membership and research-run appearances are separate relationships, so the same video can appear in multiple projects or runs without duplicating its transcript.
-
-## Transcript handling
-
-- Transcript text is private application data and must remain in D1 or another private storage service.
-- Do not commit transcripts, transcript excerpts, personal notes or analysis output containing private material to this public repository.
-- Preserve language, caption type, source method, retrieval time, content checksum and status.
-- Manual paste is a supported source; automated providers can be added later behind the same transcript contract.
-- Keep transcript revisions rather than silently overwriting the only copy.
-
-## Environments and deployment
-
-Use separate development and production Worker environments and separate D1 databases. Do not point test workflows at production data.
-
-The Worker will be deployed from cloudflare/ using a dedicated Wrangler configuration. The GitHub integration must be configured to use this directory as its project root, not the repository root. Deployment configuration will be added only after the Worker implementation and tests are ready.
-
-Initial account setup, D1 creation, Access policy setup and secret configuration require the account owner's explicit actions in Cloudflare. No account token or credential should be pasted into chat or committed.
-
-## First milestone acceptance criteria
-
-- [ ] Worker code and API contract reviewed.
-- [ ] D1 database created for development.
-- [ ] Access protection configured and verified.
-- [ ] One video can be saved and retrieved.
-- [ ] A manually pasted transcript can be saved and retrieved by video ID.
-- [ ] Duplicate saves update/create transcript revisions without duplicating the video.
-- [ ] Unauthorized read/write requests fail.
-- [ ] Automated tests pass.
-- [ ] No production deployment or migration until development test passes.
-
-## Current status
-
-Architecture and schema proposal only. No Cloudflare resources have been created, no Worker has been deployed, and no live database exists yet.
+Do not use a real private transcript in test artifacts. No public Pages UI integration, bulk ingestion, review-decision API or analysis endpoints are included yet.

@@ -73,3 +73,9 @@ A second manual workflow, Transcript provider diagnostic (separate), uses the op
 - A block from both providers would be evidence about this runner, not proof that every network is blocked.
 
 Run the Norsat sample once, inspect the report, and decide the next experiment from the evidence.
+
+## Live provider comparison result — 2026-11-13
+
+The separate `youtube-transcript-api` diagnostic was run against the same Norsat webinar sample (video ID `efjBiVN_N3M`). It completed safely but returned `blocked` with detail code `ACCESS_CHALLENGE_OR_RATE_LIMIT`, zero segments and no transcript text persisted. The diagnostic uploaded only a sanitized report. Together with the earlier yt-dlp result (YouTube sign-in/bot challenge), this indicates that GitHub-hosted runner access is currently unsuitable for our first transcript test. It does not establish that all networks or hosted transcript APIs are blocked.
+
+Decision: pause further extractor/provider experiments. Use a manual browser transcript paste as the next input path and store it privately. Evaluate hosted providers separately only when there is a clear reason and cost/security review.

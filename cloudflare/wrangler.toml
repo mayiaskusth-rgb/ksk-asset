@@ -1,0 +1,14 @@
+name = "ksk-research-api"
+main = "src/index.ts"
+compatibility_date = "2026-11-13"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ksk-research-dev"
+database_id = "REPLACE_WITH_DEV_D1_DATABASE_ID"
+migrations_dir = "migrations"
+
+[vars]
+ACCESS_TEAM_DOMAIN = "REPLACE_WITH_CLOUDFLARE_TEAM_NAME"
+ACCESS_AUD = "REPLACE_WITH_ACCESS_APPLICATION_AUD"

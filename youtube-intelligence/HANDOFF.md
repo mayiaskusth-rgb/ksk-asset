@@ -894,3 +894,13 @@ Complete one live round trip on Android: open an existing shortlisted video, pas
 ### Owner approval boundary
 
 The user asked to close implementation work quickly; PR #17 has been merged. This does not authorize a public API, auth bypass, remote D1 migration, Worker deployment, or entering payment details. Obtain explicit approval before any remote migration or deployment. Never request tokens/passwords/card details in chat and do not ask the Android-only user to run terminal commands.
+
+
+### 24.1 Post-merge verification update — 2026-11-14
+
+PR #17 is merged as f755d4da8e7c24bfa4c1bd6f4d89f62cda1939df. All three main-branch workflows passed on that merge commit:
+- Cloudflare API checks: [43509948988](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509948988)
+- Python tests: [43509949086](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509949086)
+- GitHub Pages deployment: [43509949087](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509949087)
+
+The static Research Explorer update has therefore been published through the existing Pages workflow. This is not a Cloudflare Worker deployment. Cloudflare Access, remote D1 migration and live Android save/retrieve test remain pending.

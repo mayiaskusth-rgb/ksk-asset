@@ -617,3 +617,6 @@ A follow-up adapter-hardening commit initially introduced a literal escaped newl
 
 
 The next run exposed a second literal escaped-newline typo in the new adapter test assertion (not application code). It was corrected in commit `dbd366b20987ef17e485a67304c2cf7abd65e25a`. The latest run must be checked again; do not cite the earlier 33-test result as validation of these newest edits.
+
+
+The regional-language test then exposed that the intended helper replacement had not actually applied; the old fallback remained. The helper was replaced explicitly in commit `ddcf55679ae14880ea085f56a07ffbca046b3b2c`. Verify the next CI run before proceeding. This was a test-detected behavior bug: explicit regional requests could have fallen back to a different region, which is now intended to be disallowed.

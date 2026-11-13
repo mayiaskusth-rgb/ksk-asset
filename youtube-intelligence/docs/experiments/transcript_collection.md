@@ -72,3 +72,18 @@ The first local normalization slice is now implemented on draft PR #11 in `src/y
 - synthetic tests, with no network dependency.
 
 This is not yet a YouTube collector. Track discovery, caption selection, retrieval, error mapping, caching and live satellite sampling remain future work. See the latest dated section in `HANDOFF.md`.
+
+
+## Adapter implementation update (2026-11-13)
+
+An optional yt-dlp Python API adapter now exists at `src/yti/transcript_adapter.py`. It:
+- inspects metadata for creator and automatic caption tracks;
+- prefers creator captions, then auto captions, for the requested language only;
+- uses skip-download options for both metadata and caption retrieval;
+- writes caption files to a temporary directory for parsing and cleanup;
+- sets retry counts to zero and maps rate-limit/challenge signals to explicit blocked states;
+- has mocked tests and does not make network calls during CI.
+
+Install the optional dependency with `pip install -e ".[youtube,dev]"`.
+
+**Still pending:** verify CI at the latest branch head; validate yt-dlp's current real output naming and metadata; perform a bounded, opt-in live test against a few already-selected satellite videos. Do not start a live batch until the test suite passes and the adapter's actual skip-download behavior is confirmed.

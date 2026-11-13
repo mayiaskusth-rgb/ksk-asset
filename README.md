@@ -50,7 +50,7 @@ The Python project lives in [`youtube-intelligence/`](youtube-intelligence/).
 
 Its purpose is to discover audience demand, identify videos that outperform their creators' normal performance, analyze storytelling and audience signals, and produce evidence-backed opportunity reports.
 
-**Current status:** MVP preserved; Iteration 0 architecture, contracts and reuse research are complete on the feature branch (PR #1). The current executable stage still uses local fixture data and deterministic scoring. Live YouTube discovery, channel-baseline collection, transcript/comment analysis, and adaptive research are future iterations.
+**Current status:** Deterministic scoring and the bounded no-API YouTube search probe are implemented. The first live satellite run completed successfully (10 searches, 50 result slots, 47 unique videos). The [Research Run Explorer](research.html) is an additive static page; the existing asset gallery remains intact. Creator baselines/outlier scoring, transcript collection, comment analysis, and adaptive research are future iterations.
 
 Start with:
 - [YouTube Intelligence README](youtube-intelligence/README.md) — current capabilities, setup, and roadmap.

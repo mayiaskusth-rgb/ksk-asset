@@ -14,7 +14,7 @@ See:
 - [Satellite idea-generation experiment](docs/experiments/satellite_idea_generation.md)
 - [Structured idea output](data/experiments/satellite_ideas.json)
 
-The next stages are YouTube search, metadata hydration, creator-relative baselines/outlier selection, then transcript analysis. Video/frame analysis is explicitly deferred. The experiment document records overlap risks and tuning criteria.
+The next stage is a conservative no-API YouTube search probe using yt-dlp: one query per idea, five results, sequential requests, local caching, no authentication/cookies/proxy, zero retries, and a global stop on access restrictions. See [probe design and run instructions](docs/experiments/satellite_no_api_probe.md). This adapter is implemented and unit-tested with mocked responses; live extraction has not yet been run. Channel baselines and transcript analysis remain later stages. Video/frame analysis is explicitly deferred.
 
 ## Start here
 
@@ -36,6 +36,9 @@ source .venv/bin/activate
 
 pip install -e ".[dev]"
 pytest
+# Optional no-API YouTube search probe:
+pip install -e ".[probe]"
+python -m yti.providers.yt_dlp_probe
 yti score --input data/sample_videos.json --output runs/demo/outliers.csv
 yti report --input runs/demo/outliers.csv --output runs/demo/report.md
 \`\`\`
@@ -92,7 +95,7 @@ A views-to-subscriber ratio is a separate metric from creator-relative outlier s
 3. [x] Iteration 0 architecture, contracts, scoring methodology and reuse reconnaissance (PR #1 open; not merged).
 4. [x] Satellite idea-generation prompt, response validation and first model dry run (experiment branch).
 5. [ ] Configurable LLM provider adapter and persisted model/prompt/run metadata.
-6. [ ] YouTube search adapter and reproducible discovery runs (20 queries, 20–30 results per query for this experiment).
+6. [ ] Validate the bounded no-API satellite search probe locally; review result relevance, metadata completeness, duplicates and any access restrictions before deciding whether to continue. Official API adapter remains a future replaceable option.
 7. [ ] Channel uploads, comparable baselines and creator-relative outlier selection.
 8. [ ] Transcript collection and evidence-linked theme/storytelling analysis.
 9. [ ] Comparative research report and opportunity hypotheses.

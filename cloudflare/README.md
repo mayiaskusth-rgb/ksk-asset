@@ -80,3 +80,11 @@ Do not add bulk imports, automated transcript-provider fallback, analysis endpoi
 PR [#18](https://github.com/mayiaskusth-rgb/ksk-asset/pull/18) implements an owner-only password exchange for 20-minute HMAC-signed sessions. It replaces the Access JWT dependency and updates the Research Explorer to prompt for the password while retaining the session token in memory only. Required production runtime secrets are `OWNER_PASSWORD` and `SESSION_SECRET` (minimum 32 characters). Configure them as encrypted Worker secrets after deployment; do not add them to `wrangler.toml`, GitHub, or browser storage. Configure edge rate limiting for `POST /api/auth/login` before using the endpoint.
 
 PR #18 is open and CI is pending on its latest head. The Worker is still not deployed; remote D1 migration and live save/retrieve remain unperformed. In Cloudflare Workers Builds, the project/Worker name must be `ksk-research-api` to match Wrangler, and the repository root directory must be `cloudflare`. Keep Cloudflare Access off. The auto-created Workers Builds API token is separate from the runtime Worker secrets.
+
+
+## Login rate limiting — 2026-11-14
+
+- `POST /api/auth/login` uses the Cloudflare Workers Rate Limiting binding, keyed by the edge-provided client IP, with a threshold of 5 attempts per 60 seconds per Cloudflare location.
+- This is an approximate, location-local control; it is not a strict global limit and can be exceeded briefly while counters synchronize. It adds friction to repeated password guessing but does not replace strong unique secrets or monitoring.
+- The binding is configured in `wrangler.toml` as `LOGIN_RATE_LIMITER`. Tests cover repeated failed attempts and a blocked subsequent login.
+- This change must pass CI and be deployed before the protection is live. Do not treat the currently deployed Worker as rate-limited until then.

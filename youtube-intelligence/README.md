@@ -6,6 +6,8 @@ This module lives in the public `ksk-asset` repository but is **not a KSK story-
 
 **Current status:** MVP foundation preserved. Iteration 0 architecture, data contracts and reuse reconnaissance are being established on `work/youtube-intelligence-iteration-0`. The executable MVP still uses local fixture data and deterministic scoring. Live YouTube discovery, channel-baseline collection, transcript/comment analysis, adaptive research and full opportunity reporting are future iterations.
 
+**Research Run Explorer:** The static [explorer](../research.html) displays the first bounded satellite run (10 searches, 50 result slots, 47 unique videos), with per-query positions, provenance, metadata, direct YouTube links and an optional embedded player. Transcript and video-analysis sections are explicit placeholders until those stages are implemented.
+
 ## Start here
 
 1. Read [HANDOFF.md](HANDOFF.md) before making architectural changes or starting work from a new chat.

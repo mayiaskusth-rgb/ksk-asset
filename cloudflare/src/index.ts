@@ -123,26 +123,22 @@ export default {
       const language = typeof body.language_code === "string" ? body.language_code.slice(0, 20) : null;
       const checksum = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(content));
       const hash = Array.from(new Uint8Array(checksum), (b) => b.toString(16).padStart(2, "0")).join("");
-      const duplicate = await env.DB.prepare(
-        "SELECT transcript_id, revision FROM transcripts WHERE video_id = ? AND content_sha256 = ? ORDER BY revision DESC LIMIT 1",
-      ).bind(transcriptMatch[1], hash).first<{ transcript_id: string; revision: number }>();
-      if (duplicate) return json({ ...duplicate, unchanged: true });
+      const latest = await env.DB.prepare(
+        "SELECT transcript_id, revision, content_sha256 FROM transcripts WHERE video_id = ? ORDER BY revision DESC LIMIT 1",
+      ).bind(transcriptMatch[1]).first<{ transcript_id: string; revision: number; content_sha256: string }>();
+      if (latest?.content_sha256 === hash) {
+        return json({ transcript_id: latest.transcript_id, revision: latest.revision, unchanged: true });
+      }
       const transcriptId = crypto.randomUUID();
       try {
         await env.DB.prepare(`INSERT INTO transcripts
           (transcript_id, video_id, revision, status, source_type, source_provider, language_code, caption_type, content_text, content_sha256)
-          SELECT ?, ?, COALESCE(MAX(revision), 0) + 1, 'available', 'manual', 'manual_paste', ?, 'unknown', ?, ?
-          FROM transcripts WHERE video_id = ?`)
-          .bind(transcriptId, transcriptMatch[1], language, content, hash, transcriptMatch[1]).run();
-        // The SELECT above returns no row for a video with no prior transcript; insert revision 1 in that case.
+          VALUES (?, ?, (SELECT COALESCE(MAX(revision), 0) + 1 FROM transcripts WHERE video_id = ?),
+            'available', 'manual', 'manual_paste', ?, 'unknown', ?, ?)`)
+          .bind(transcriptId, transcriptMatch[1], transcriptMatch[1], language, content, hash).run();
         const saved = await env.DB.prepare("SELECT transcript_id, revision FROM transcripts WHERE transcript_id = ?")
           .bind(transcriptId).first<{ transcript_id: string; revision: number }>();
-        if (saved) return json(saved, 201);
-        await env.DB.prepare(`INSERT INTO transcripts
-          (transcript_id, video_id, revision, status, source_type, source_provider, language_code, caption_type, content_text, content_sha256)
-          VALUES (?, ?, 1, 'available', 'manual', 'manual_paste', ?, 'unknown', ?, ?)`)
-          .bind(transcriptId, transcriptMatch[1], language, content, hash).run();
-        return json({ transcript_id: transcriptId, revision: 1 }, 201);
+        return json(saved ?? { transcript_id: transcriptId }, 201);
       } catch {
         return json({ error: "could_not_save_transcript_video_must_exist_first" }, 400);
       }

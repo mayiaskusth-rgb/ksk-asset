@@ -656,3 +656,34 @@ The analyser remains **designed but not selected/implemented as an execution mod
 ### Probe harness CI verification — 2026-11-13
 
 The first CI run for the new probe tests caught a test import/monkeypatch target issue; it did not reach the live adapter. The test was corrected to import and patch `yti.transcript_probe` directly. Latest verified CI run [43463631750](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43463631750) passed on the probe implementation: **37 tests passed**, and the existing five-video sample scoring/report pipeline completed. This validates the bounded runner's mocked behavior and privacy-safe report shape only. It is not live YouTube validation.
+
+
+## 21. Live transcript challenge and isolated provider diagnostic (2026-11-13)
+
+### Verified live result
+
+- Main commit: 6ca592d3515ba348b570c5122cd6e30450989969.
+- Live workflow run: https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43466201180.
+- Runner: GitHub-hosted Ubuntu 24.04, Azure westus3.
+- Installed yt-dlp: 2026.10.26.
+- Selected sample: Norsat International satellite communications webinar, efjBiVN_N3M.
+- Extractor response: Sign in to confirm you’re not a bot.
+- Result: blocked / ACCESS_CHALLENGE, zero transcript segments, no retry, sanitized report only. Green workflow means the challenge was handled as designed, not that extraction succeeded.
+
+### Isolated diagnostic branch
+
+Branch: diagnostic/youtube-transcript-api-comparison.
+
+This branch adds an optional youtube-transcript-api adapter and a separate manual GitHub Actions workflow. It is not an automatic fallback and does not change the yt-dlp adapter, CLI, or workflow.
+
+- src/yti/transcript_api_adapter.py: normalizes timestamped snippets and classifies blocked/no-caption/provider-error outcomes.
+- src/yti/transcript_api_diagnostic.py and scripts/run_transcript_api_diagnostic.py: one selected video, sanitized report.
+- .github/workflows/transcript-provider-diagnostic.yml: independent workflow, one-video selection only.
+- Optional dependency: pip install -e .[transcript-diagnostic].
+- Tests: tests/test_transcript_api_adapter.py and tests/test_transcript_api_diagnostic.py.
+
+Safeguards: no cookies, browser sessions, proxies, CAPTCHA workarounds, media downloads, automatic retry/fallback, or transcript-text artifacts. A second provider may still be blocked by the same runner network; this experiment is comparative evidence, not a bypass strategy.
+
+### Next action
+
+Review diagnostic branch CI. If it passes, merge only after review, then manually run the separate workflow once with norsat-webinar. Inspect the sanitized artifact before deciding anything further. Do not run the second sample or bulk collection yet. Do not start transcript analysis until acquisition is demonstrated on real caption data.

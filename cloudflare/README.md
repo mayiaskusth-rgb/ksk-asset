@@ -18,7 +18,7 @@ Do not connect the existing repository root to a generic Worker deployment. The 
 
 Never put API secrets, Cloudflare account tokens, Access service tokens, private transcripts or user notes in this public repository.
 
-The API must be protected before any write or private read endpoint is exposed. Preferred initial browser access is Cloudflare Access in front of a dedicated API hostname, with Worker-side authorization checks. CORS is not authentication. Do not rely on an unguessable URL or a secret embedded in frontend JavaScript.
+The API must be protected before any write or private read endpoint is exposed. Preferred initial browser access is Cloudflare Access in front of a dedicated API hostname, with Worker-side authorization checks. The browser must use the Access-supported login/session flow for cross-origin API calls; verify cookie and CORS behaviour in a real mobile-browser test before integrating the public Pages UI. CORS is not authentication. Do not rely on an unguessable URL or a secret embedded in frontend JavaScript. The first deployment is single-user/private; do not assume the schema is ready for multiple independent users or tenants.
 
 ## Data model
 

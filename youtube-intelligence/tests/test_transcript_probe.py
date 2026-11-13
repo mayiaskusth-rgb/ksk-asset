@@ -1,6 +1,6 @@
 from yti.contracts import SourceReference
 from yti.transcripts import TranscriptObservation, TranscriptSegment
-from scripts.run_transcript_probe import run_probe
+from yti.transcript_probe import run_probe
 
 
 class FakeAdapter:
@@ -29,7 +29,7 @@ class FakeAdapter:
 
 def test_probe_defaults_to_one_selected_long_video(monkeypatch, tmp_path):
     FakeAdapter.calls.clear()
-    monkeypatch.setattr("scripts.run_transcript_probe.YtDlpTranscriptAdapter", FakeAdapter)
+    monkeypatch.setattr("yti.transcript_probe.YtDlpTranscriptAdapter", FakeAdapter)
     output = tmp_path / "report.json"
 
     report = run_probe("norsat-webinar", output)

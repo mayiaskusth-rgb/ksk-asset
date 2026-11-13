@@ -4,7 +4,7 @@ An independent Python research-engineering product for YouTube topic discovery, 
 
 This module lives in the public \`ksk-asset\` repository but is **not a KSK story-development agent**. See the repository root README for the boundary and [HANDOFF.md](HANDOFF.md) for the full product specification and engineering instructions.
 
-**Current status:** The Iteration 0 foundation is on \`work/youtube-intelligence-iteration-0\` and PR #1 remains open and unmerged. A separate satellite experiment branch, \`experiment/satellite-research-pipeline\`, builds on that foundation without modifying the PR branch. It adds a provider-neutral idea prompt/validator and records the first model dry run. Live LLM API execution and YouTube discovery are not implemented yet.
+**Current status:** The static [Research Run Explorer](../research.html) is available alongside the existing asset gallery. It currently displays the first bounded satellite run (10 searches, 50 result slots, 47 unique videos), including search phrases, returned positions, metadata, cross-query overlap, direct YouTube links and an optional embedded player. Transcript and video-analysis sections are explicit placeholders. The Iteration 0 foundation is on \`work/youtube-intelligence-iteration-0\` and PR #1 remains open and unmerged. A separate satellite experiment branch, \`experiment/satellite-research-pipeline\`, builds on that foundation without modifying the PR branch. It adds a provider-neutral idea prompt/validator and records the first model dry run. Live LLM API execution and YouTube discovery are not implemented yet.
 
 ## Active experiment: Satellites
 

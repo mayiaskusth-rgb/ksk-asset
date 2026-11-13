@@ -266,6 +266,76 @@ Engineering constraints:
 - Keep credentials in environment variables or an appropriate secret store.
 - Build replaceable adapters and explicit source capability declarations.
 
+## 8. Open-source GitHub reconnaissance and reuse-first strategy
+
+**This is a required workstream in Iteration 0, not an optional later task.** Before building additional connectors or analysis modules, conduct a structured survey of public GitHub projects that solve parts of this problem. The goal is to reuse proven components where sensible and avoid rebuilding commodity plumbing.
+
+Search GitHub broadly, not only for projects literally named "YouTube research". Include repositories in these categories:
+
+1. **YouTube discovery and metadata:** search, video details, channel details, playlists, uploads, search expansion, and data collection.
+2. **Channel analytics and competitor research:** channel upload history, video comparisons, creator baselines, niche discovery, and performance tracking.
+3. **Outlier detection:** outlier scores, views/subscriber ratios, creator-relative scoring, viral-video discovery, and competitor analysis.
+4. **Transcripts and captions:** transcript retrieval, language detection, timestamped segments, subtitle parsing, and transcript storage.
+5. **Comments and audience signals:** comment retrieval, question/theme clustering, sentiment, audience pain points, and topic requests.
+6. **Content/video intelligence:** title and thumbnail analysis, video summarization, chapter/structure extraction, visual/frame analysis, and multimodal understanding.
+7. **MCP servers and agent tools:** YouTube MCP servers and MCP toolkits that expose search, metadata, transcripts, comments, or channel data.
+8. **End-to-end research products:** open-source YouTube research dashboards, CLI tools, trend discovery, niche research, and creator intelligence platforms.
+
+### Required discovery method
+
+- Use GitHub repository search with multiple query variants and language/topic filters.
+- Search for implementation terms and dependencies, not just project names.
+- Follow references from useful repositories to libraries they depend on.
+- Inspect repository source, not just README claims.
+- Look at recent commits, releases, issues, pull requests, test coverage, examples, and maintainer activity.
+- Confirm the actual license in the repository. A public repository is not automatically open-source or reusable.
+- Check whether the project is archived, abandoned, API-dependent, brittle, or based on unofficial scraping.
+- Record the date of the review and the commit/release inspected because project status changes.
+
+### Candidate evaluation matrix
+
+Create a maintained inventory, for example `docs/repo_landscape.md`, with one row per candidate:
+
+| Field | What to record |
+|---|---|
+| Project | Name and repository URL |
+| Category | Discovery, analytics, outliers, transcripts, comments, MCP, synthesis, etc. |
+| License | Exact license and any reuse restrictions |
+| Maintenance | Last meaningful commit/release, activity, open issues |
+| Implementation | Language, framework, dependencies, architecture |
+| Capabilities | Actual functions and data fields verified in code |
+| Data source | Official API, public page, third-party API, scraping, browser automation |
+| Setup | API key, OAuth, cookies, paid account, quota, hosted dependency |
+| Reliability | Tests, retries, rate limiting, known breakages |
+| Policy/privacy | Platform terms, data handling, user data, redistribution concerns |
+| Reuse decision | Adopt, wrap with adapter, borrow design only, defer, or reject |
+| Rationale | Concrete reason for the decision |
+
+Do not rank projects by stars alone. Consider correctness, maintenance, license, data access, reliability, and fit with our modular architecture.
+
+### Reuse decision rules
+
+Classify each candidate:
+
+- **Adopt:** mature, appropriately licensed, maintained, tested, and directly useful.
+- **Wrap:** useful capability but isolate it behind our own adapter/data contract.
+- **Borrow design:** useful algorithms or architecture, but do not depend on the project at runtime.
+- **Prototype:** promising but uncertain; test in a disposable spike before adoption.
+- **Reject/defer:** incompatible license, abandoned, unreliable, policy-risky, unnecessary, or poor fit.
+
+Prefer small, composable dependencies over adopting a large application wholesale. Do not copy code without license review and attribution obligations. Do not add a dependency just because it exists.
+
+### Minimum Iteration 0 outputs
+
+- `docs/repo_landscape.md` — reviewed GitHub projects, category coverage, findings, and reuse decisions.
+- `docs/tooling_landscape.md` — relevant hosted tools/extensions/MCP services, free-tier limits, and comparison with open-source options.
+- An explicit **build vs reuse** decision for each major capability.
+- A short list of candidate libraries/projects for isolated technical spikes in later iterations.
+
+The initial scan should be broad enough to avoid tunnel vision, then narrow to a small shortlist for deeper code/license review. Aim to inspect a meaningful spread of candidates across all eight categories; do not pad the inventory with irrelevant repositories just to hit a number.
+
+**Important:** Do not assume that an MCP server is the best way to integrate a capability. Compare direct Python library/API use, an MCP adapter, and independent implementation. The engine's internal contracts must remain ours so a data provider can be replaced later.
+
 ## 8. Benchmark topics
 
 Use these three initial benchmark subjects:
@@ -278,13 +348,13 @@ These represent different kinds of subjects. Give the system only the broad subj
 
 Compare discovery quality, outlier quality, audience insights, evidence coverage, and whether the resulting opportunities are genuinely useful.
 
-## 9. Iteration roadmap
+## 10. Iteration roadmap
 
 Every iteration requires: objective, acceptance criteria, implementation, tests, real experiment where applicable, failure analysis, documentation, and a verified commit.
 
 ### Iteration 0 — Architecture and data contracts
 - Audit existing code, tests, README, workflow, and repository state.
-- Investigate relevant outlier tools/extensions, MCP servers, and reusable libraries.
+- Conduct the required public GitHub repository reconnaissance across all eight categories; inspect source, licenses, maintenance, data sources, tests, and policy constraints.\n- Create `docs/repo_landscape.md` and `docs/tooling_landscape.md` with explicit adopt/wrap/borrow/prototype/reject decisions.\n- Compare direct Python/API integration with MCP and custom implementation; identify reusable components and avoid rebuilding commodity plumbing.\n- Investigate relevant outlier tools/extensions and hosted research products.
 - Define module boundaries and data models.
 - Define source adapter interfaces and provenance requirements.
 - Specify outlier scoring and comparability constraints.
@@ -322,7 +392,7 @@ Do not build a dashboard first. Prove the engine through a reliable CLI before a
 
 Do not advance merely because code runs. Demonstrate that the intended capability works.
 
-## 10. Engineering quality bar
+## 11. Engineering quality bar
 
 Maintain:
 - Clear module boundaries and type hints.
@@ -348,7 +418,7 @@ For each iteration:
 
 No dashboard-first approach. No manual-search substitution. No invented metrics. No unsupported claims.
 
-## 11. First instruction to the next engineering chat
+## 12. First instruction to the next engineering chat
 
 **Go. Read this handoff and inspect the current repository. Start Iteration 0.**
 

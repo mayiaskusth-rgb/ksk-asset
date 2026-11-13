@@ -31,7 +31,7 @@ The YouTube Intelligence Engine is independent from the private KSK editorial wo
 - Python CI passed for the updated explorer/test contract on head `60e3fdc7600df823be5ea87294f8b9d460fd1256` (run [43509321262](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509321262)). The Explorer test was updated to expect the new transcript controls.
 - Cloudflare API CI passed on final PR head `5df01cf74072209bf6772d58fbeda7e5a5ea018b` (run [43509893658](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509893658)). The authenticated test invokes the Worker handler directly, simulates the edge-injected Access assertion, and stubs the JWKS fetch; production authentication code is unchanged.
 - Python CI passed on the same PR head (run [43509893760](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509893760)).
-- PR #17 is merged. Main-branch workflows, including the GitHub Pages deployment, are being checked separately.
+- PR #17 is merged. Main-branch Cloudflare API checks, Python tests and GitHub Pages deployment all passed for merge commit `f755d4da8e7c24bfa4c1bd6f4d89f62cda1939df` (runs [43509948988](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509948988), [43509949086](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509949086), and [43509949087](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509949087)).
 - Earlier PRs #14 and #16 were consolidated into the branch/PR #17 development line; use the live PR state rather than old handoff entries when checking merge status.
 
 ## Cloudflare account and authentication constraints

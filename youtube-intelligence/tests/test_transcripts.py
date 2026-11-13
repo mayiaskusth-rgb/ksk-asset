@@ -112,3 +112,10 @@ def test_segment_rejects_negative_time_and_empty_text():
         TranscriptSegment(-1, 1, "text")
     with pytest.raises(ValueError):
         TranscriptSegment(0, 1, "  ")
+
+
+def test_segment_rejects_non_finite_timing():
+    with pytest.raises(ValueError, match="finite"):
+        TranscriptSegment(float("nan"), 1.0, "text")
+    with pytest.raises(ValueError, match="finite"):
+        TranscriptSegment(0.0, float("inf"), "text")

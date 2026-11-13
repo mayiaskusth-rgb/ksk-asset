@@ -614,3 +614,6 @@ Tests cover single-video scope and strict regional language matching. These chan
 ### Latest CI debugging note (2026-11-13)
 
 A follow-up adapter-hardening commit initially introduced a literal escaped newline in the options dictionary, causing test collection to fail. The syntax issue was corrected in commit `cfec61f0f310954f9ce821263725f7fe2831aa4e`. The next CI run on that commit must pass before the PR is considered ready. The previous 33-test pass remains valid only for the earlier code state.
+
+
+The next run exposed a second literal escaped-newline typo in the new adapter test assertion (not application code). It was corrected in commit `dbd366b20987ef17e485a67304c2cf7abd65e25a`. The latest run must be checked again; do not cite the earlier 33-test result as validation of these newest edits.

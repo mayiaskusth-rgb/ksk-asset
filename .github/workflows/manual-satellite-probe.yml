@@ -3,6 +3,11 @@ name: Manual satellite research probe
 on:
   workflow_dispatch:
     inputs:
+      target_ref:
+        description: "Branch containing the satellite probe code"
+        required: true
+        type: string
+        default: "experiment/satellite-no-api-probe"
       acknowledge_limits:
         description: "Confirm this is the bounded public-data probe (10 queries max, 5 results each)"
         required: true
@@ -25,10 +30,10 @@ jobs:
       run:
         working-directory: youtube-intelligence
     steps:
-      - name: Check out selected branch
+      - name: Check out probe code branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ inputs.target_ref }}
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

@@ -6,7 +6,7 @@
 
 **Repository:** [mayiaskusth-rgb/ksk-asset](https://github.com/mayiaskusth-rgb/ksk-asset)  
 **Module:** `youtube-intelligence/`  
-**Status:** Existing Python MVP preserved. Iteration 0 foundation is in progress on `work/youtube-intelligence-iteration-0`; see the module README and `docs/` for the branch deliverables.
+**Status:** Existing Python MVP preserved. Iteration 0 foundation is implemented and CI-verified on `work/youtube-intelligence-iteration-0`; see the module README and `docs/` for deliverables.
 
 ---
 
@@ -337,7 +337,7 @@ Prefer small, composable dependencies over adopting a large application wholesal
 - `tests/test_contracts.py` — deterministic contract validation tests.
 - An explicit **build vs reuse** decision for each major capability and a shortlist of technical spikes.
 
-**Iteration 0 branch status (2026-11-13):** The above documents and additive contracts are present on `work/youtube-intelligence-iteration-0`. The existing scoring, IO, report, CLI, fixtures and CI workflow are unchanged. CI execution on the feature branch is still required before Iteration 0 can be marked complete.
+**Iteration 0 status (2026-11-13):** Complete on `work/youtube-intelligence-iteration-0`. The above documents and additive contracts are present. Existing scoring, IO, report, CLI, fixtures and CI workflow are unchanged. GitHub Actions run [43416775747](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43416775747) completed successfully: package installation, all tests, sample scoring/report pipeline and artifact upload passed.
 
 The initial scan should be broad enough to avoid tunnel vision, then narrow to a small shortlist for deeper code/license review. Aim to inspect a meaningful spread of candidates across all eight categories; do not pad the inventory with irrelevant repositories just to hit a number.
 

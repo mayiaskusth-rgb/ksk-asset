@@ -4,7 +4,7 @@ An independent Python research-engineering product for YouTube topic discovery, 
 
 This module lives in the public `ksk-asset` repository but is **not a KSK story-development agent**. See the repository root README for the boundary and [HANDOFF.md](HANDOFF.md) for the full product specification and engineering instructions.
 
-**Current status (2026-11-13):** MVP and Iteration 0 foundation are preserved and merged into `main`. The active design branch is `research/transcript-intelligence-foundation` ([draft PR #11](https://github.com/mayiaskusth-rgb/ksk-asset/pull/11)). It adds transcript-tool reconnaissance, a transcript-intelligence analysis contract, an output-schema proposal, and updated handoff/roadmap notes. The transcript foundation now includes provider-neutral transcript observation/segment records, deterministic WebVTT and YouTube JSON3 parsers, an optional yt-dlp captions-only adapter, and a `yti transcript` CLI command for one explicitly selected video. Synthetic tests mock the extractor. A bounded, opt-in GitHub Actions probe now targets one 59-minute satellite video by default, with a second 48-minute video available for a sequential comparison; the first live run was safely blocked by YouTube's sign-in/bot challenge; no transcript was retrieved. A separate manual diagnostic using youtube-transcript-api is being added on diagnostic/youtube-transcript-api-comparison to compare provider behaviour on the same single video; it is not an automatic fallback and does not change the yt-dlp path. Install the yt-dlp adapter with `pip install -e ".[youtube,dev]"`; install the separate diagnostic with `pip install -e ".[transcript-diagnostic]"`. Run one explicitly selected video with `yti transcript --video-id VIDEO_ID --url YOUTUBE_URL --language en --output runs/private/VIDEO_ID.transcript.json`. Keep that output local/private; do not commit transcript JSON.
+**Current status (2026-11-13):** The Python MVP, bounded discovery workflow, Research Run Explorer, transcript normalization/analysis design, captions-only yt-dlp adapter, and separate `youtube-transcript-api` diagnostic are merged into `main`. Both live extraction approaches were blocked by YouTube access challenges on GitHub-hosted runners; neither retrieved transcript text. The workflows handled the blocks safely and uploaded sanitized status only. Manual browser copy/paste is the next practical transcript input path; automated hosted providers remain separate future experiments. The Cloudflare persistence proposal is being developed independently under `cloudflare/`; no Cloudflare resources or deployments exist yet.
 
 **Research Run Explorer:** The static [explorer](../research.html) displays the first bounded satellite run (10 searches, 50 result slots, 47 unique videos), with per-query positions, provenance, metadata, direct YouTube links and an optional embedded player. Transcript and video-analysis sections are explicit placeholders until those stages are implemented.
 
@@ -77,7 +77,11 @@ A views-to-subscriber ratio is a separate metric from creator-relative outlier s
 - `.github/workflows/python-tests.yml` — test suite on pushes and pull requests.
 - [`HANDOFF.md`](HANDOFF.md) — complete product vision, architecture, data-source constraints, development expectations, and next-chat instructions.
 
-## Bounded transcript experiment\n\nThe first live test is deliberately limited to one long-form satellite result (59:14); a second (48:17) is optional. Run it from GitHub Actions → **Satellite transcript probe** after the workflow is merged to `main`. Only a sanitized status/metadata report is uploaded; transcript text is never published as an artifact. See [the experiment protocol](docs/experiments/transcript_collection.md).\n\n## Transcript intelligence design
+## Bounded transcript experiment
+
+The first live test is deliberately limited to one long-form satellite result (59:14); a second (48:17) is optional. Run it from GitHub Actions → **Satellite transcript probe** after the workflow is merged to `main`. Only a sanitized status/metadata report is uploaded; transcript text is never published as an artifact. See [the experiment protocol](docs/experiments/transcript_collection.md).
+
+## Transcript intelligence design
 
 Read these before implementing transcript work:
 - [Transcript collection design](docs/experiments/transcript_collection.md) — captions-only acquisition, provenance, status handling and safety boundaries.
@@ -104,7 +108,7 @@ The intended analysis covers concepts, multi-label content format, narrative mod
 13. [ ] Reliability improvements: caching, retries, logging, quota/cost controls, and versioned reports.
 14. [ ] Consider a dashboard only after the CLI research engine is reliable.
 
-**Immediate next work:** merge the bounded probe workflow, run the default one-video experiment, review the sanitized result, then optionally test the second video. Fix extraction issues before selecting/building the analyser. Do not expand to the full 47-video set yet.
+**Immediate next work:** establish private persistence with one manually supplied video and transcript. The two GitHub-hosted transcript extraction approaches have already been tested and blocked; do not repeat them or expand to bulk collection. Once persistence works, use one transcript to test analysis.
 
 
 ## Transcript access diagnostic

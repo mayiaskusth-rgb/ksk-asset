@@ -687,3 +687,28 @@ Safeguards: no cookies, browser sessions, proxies, CAPTCHA workarounds, media do
 ### Next action
 
 Review diagnostic branch CI. If it passes, merge only after review, then manually run the separate workflow once with norsat-webinar. Inspect the sanitized artifact before deciding anything further. Do not run the second sample or bulk collection yet. Do not start transcript analysis until acquisition is demonstrated on real caption data.
+
+## Cloudflare persistence foundation — 2026-11-13
+
+A separate infrastructure proposal is being developed in the repository under `cloudflare/`. It does not replace GitHub or GitHub Pages and must not deploy the repository root as a Worker.
+
+- `cloudflare/README.md` defines the intended split: GitHub for code/versioning, GitHub Pages for the static UI, Cloudflare Workers for an authenticated API, D1 for private structured persistence, and Python/GitHub Actions for analysis jobs.
+- `cloudflare/schema.sql` proposes D1 entities for projects, research runs, canonical videos, project-video membership/review decisions, discovery provenance, transcript revisions, human notes, analysis runs and findings.
+- `cloudflare/DATA_MODEL.md` defines Keep / Drop / Review later semantics. Drop excludes a video from further processing but never deletes its record. Manual video links enter the same lifecycle.
+- First implementation gate: one canonical video and a manually pasted transcript can be saved and retrieved; revisions are retained; unauthenticated read/write requests fail.
+- Keep the first test limited to one video. Do not add bulk imports, analysis UI, or automated provider fallback yet.
+- No Worker code, D1 database, Access policy, secret, or Cloudflare deployment has been created at this design stage. The Cloudflare account owner must authorize initial resource creation and secret configuration.
+
+The current extraction experiment is complete enough to pause: the yt-dlp and separate youtube-transcript-api GitHub-hosted tests both encountered YouTube access challenges. This does not prove all networks or hosted providers are blocked. The immediate practical path is manual transcript input with private persistence.
+
+
+### Second review of Cloudflare persistence proposal — 2026-11-13
+
+A second design review identified and addressed these points on the PR branch:
+
+- Added append-only `video_review_events` so reversible Keep / Drop / Review later decisions actually retain their transition history. The Worker must update `project_videos` and insert the event atomically.
+- Corrected the transcript collection experiment notes: both GitHub-hosted extraction approaches have already been run and blocked; the next practical route is manual browser paste, not another provider diagnostic.
+- Clarified that Cloudflare Access + browser session/CORS behaviour must be tested from the mobile browser before wiring the GitHub Pages UI. CORS is not authentication.
+- The initial deployment is single-user/private. Multi-tenant ownership and authorization are not implied by this schema and would require an explicit design before multiple users are supported.
+
+Remaining implementation gates: execute the full D1 schema against SQLite/D1 in CI; test foreign-key enforcement and atomic review updates; define API payload/size limits and input validation; verify transcript revision semantics (including duplicate content); verify Access-protected API requests from the mobile browser. This PR remains design/schema only and must not be deployed as-is.

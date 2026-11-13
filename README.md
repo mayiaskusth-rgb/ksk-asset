@@ -50,7 +50,7 @@ The Python project lives in [`youtube-intelligence/`](youtube-intelligence/).
 
 Its purpose is to discover audience demand, identify videos that outperform their creators' normal performance, analyze storytelling and audience signals, and produce evidence-backed opportunity reports.
 
-**Current status:** The existing MVP and Iteration 0 foundation are preserved. PR #1 and the research-explorer/layout PRs are merged into `main`. Draft PR [#11](https://github.com/mayiaskusth-rgb/ksk-asset/pull/11) on `research/transcript-intelligence-foundation` adds transcript-tool reconnaissance, an evidence-backed analysis rubric, WebVTT/JSON3 normalization, an optional captions-only yt-dlp adapter, and a bounded probe workflow. The first live experiment targets one 59-minute satellite video by default, with a second long-form video available for comparison; live retrieval remains pending. Only sanitized probe metadata is uploaded.
+**Current status (2026-11-13):** The Python MVP, bounded discovery workflow, Research Run Explorer and transcript-intelligence foundation are merged into `main`. PR #12 added a separate `youtube-transcript-api` diagnostic; it was merged and tested independently. Both the yt-dlp captions-only probe and the separate `youtube-transcript-api` diagnostic were safely blocked by YouTube access challenges from GitHub-hosted runners. Neither retrieved transcript text. Do not interpret successful workflow completion as successful transcript acquisition. The next experiment is a manual browser copy/paste path, backed by private persistence; hosted transcript APIs can be evaluated separately later.
 
 Start with:
 - [YouTube Intelligence README](youtube-intelligence/README.md) — current capabilities, setup, and roadmap.

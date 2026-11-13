@@ -2,7 +2,7 @@
 
 **Purpose:** This is the authoritative product and engineering handoff for the independent YouTube research module in this repository. A new ChatGPT engineering chat should read this file and the current code before making changes.
 
-**Start command for the next chat:** “Read this handoff, the root README, cloudflare/README.md, and the live GitHub PR/Actions state before doing anything. Continue from the latest 2026-11-14 persistence checkpoint. The user wants a concise close-out, is Android-only, and explicitly said STOP before requesting documentation updates. Do not merge, deploy, migrate the remote database, or make other GitHub changes without fresh explicit approval. Do not ask for card details or local shell commands.”
+**Start command for the next chat:** “Read this handoff, the root README, cloudflare/README.md, and the live GitHub PR/Actions state before doing anything. Continue from the latest 2026-11-14 owner-password authentication checkpoint. The user wants a concise close-out, is Android-only, and explicitly said STOP before requesting documentation updates. Do not merge PR #18, deploy, migrate the remote database, or make other GitHub changes without fresh explicit approval. Do not ask for card details or local shell commands.”
 
 **Repository:** [mayiaskusth-rgb/ksk-asset](https://github.com/mayiaskusth-rgb/ksk-asset)  
 **Module:** `youtube-intelligence/`  
@@ -904,3 +904,39 @@ PR #17 is merged as f755d4da8e7c24bfa4c1bd6f4d89f62cda1939df. All three main-bra
 - GitHub Pages deployment: [43509949087](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509949087)
 
 The static Research Explorer update has therefore been published through the existing Pages workflow. This is not a Cloudflare Worker deployment. Cloudflare Access, remote D1 migration and live Android save/retrieve test remain pending.
+
+
+---
+
+## 25. Owner-password authentication checkpoint — 2026-11-14
+
+### Current implementation branch
+
+- PR [#18](https://github.com/mayiaskusth-rgb/ksk-asset/pull/18), branch `feature/owner-password-worker-auth`, latest known head `e8adddc70b59df26fa073ecfe5aaa89483f87e74`.
+- Replaces Cloudflare Access JWT validation with owner-password login at `POST /api/auth/login` and a 20-minute HMAC-signed bearer session.
+- Worker runtime secrets: `OWNER_PASSWORD` and `SESSION_SECRET` (at least 32 characters, randomly generated). They must be configured in Cloudflare Worker Settings > Variables and Secrets as encrypted secrets. Never place either in Wrangler vars, GitHub, the browser, or chat.
+- Research Explorer prompts for the owner password on the first private API request. It keeps the short-lived bearer token in JavaScript memory only; refresh requires signing in again. The Worker URL remains a non-secret localStorage setting.
+- CORS preflight allows only the GitHub Pages origin and the Authorization header. API reads/writes still require a valid signed session.
+- Vitest binds test-only credentials in its local Miniflare config; those values are not production secrets.
+- PR #18 CI run [43514873373](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43514873373) was in progress at the last check on an earlier PR head. Recheck the latest head and exact run before merge.
+
+### Security and deployment gates
+
+- Configure Cloudflare edge rate limiting for `POST /api/auth/login` before exposing the endpoint for use. No in-memory pseudo-rate-limit is treated as production protection.
+- No production password or signing secret has been generated or configured yet.
+- No Worker deployment, remote D1 migration, or live transcript round trip has occurred.
+- PR #18 is open. Do not merge without explicit user approval.
+- Cloudflare Git integration **Project name / Worker name must be `ksk-research-api`**, matching `name = "ksk-research-api"` in `cloudflare/wrangler.toml`. Repository root directory must be `cloudflare`. The default production branch should be `main`; Preview builds should remain disabled for the first deployment. Cloudflare Access remains OFF.
+- Workers Builds' automatically created API token is the deployment/build credential; it is separate from runtime Worker secrets. No manually entered token value is needed in the Build variables section.
+- After PR #18 is approved and merged, return to Cloudflare setup, verify the Worker name and root directory, then deploy only after the user explicitly approves. Add the two runtime secrets in the Worker settings before testing private API calls.
+- Apply the remote D1 migration only after separate explicit approval. Then test one selected shortlist video with one manually pasted transcript, retrieval, duplicate submission (no new revision), edited text (new revision), and unauthenticated rejection.
+
+### Current state labels
+
+- Owner-password Worker code: **implemented in PR #18; CI verification pending**.
+- Browser login flow: **implemented in PR #18; not yet live-tested**.
+- Production secrets: **not configured**.
+- Rate limiting: **not configured**.
+- Worker deployment / remote D1 migration / live transcript: **not done**.
+
+This section supersedes earlier handoff statements that Cloudflare Access is the selected authentication path. Keep earlier entries as historical checkpoints, but use this section and live GitHub state for current work.

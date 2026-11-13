@@ -73,3 +73,10 @@ After CI passes and the Worker is deployed with owner-password authentication:
 6. Verify unauthenticated reads and writes are rejected.
 
 Do not add bulk imports, automated transcript-provider fallback, analysis endpoints, or any public unauthenticated write path in this first persistence slice.
+
+
+## Owner-password authentication update — 2026-11-14
+
+PR [#18](https://github.com/mayiaskusth-rgb/ksk-asset/pull/18) implements an owner-only password exchange for 20-minute HMAC-signed sessions. It replaces the Access JWT dependency and updates the Research Explorer to prompt for the password while retaining the session token in memory only. Required production runtime secrets are `OWNER_PASSWORD` and `SESSION_SECRET` (minimum 32 characters). Configure them as encrypted Worker secrets after deployment; do not add them to `wrangler.toml`, GitHub, or browser storage. Configure edge rate limiting for `POST /api/auth/login` before using the endpoint.
+
+PR #18 is open and CI is pending on its latest head. The Worker is still not deployed; remote D1 migration and live save/retrieve remain unperformed. In Cloudflare Workers Builds, the project/Worker name must be `ksk-research-api` to match Wrangler, and the repository root directory must be `cloudflare`. Keep Cloudflare Access off. The auto-created Workers Builds API token is separate from the runtime Worker secrets.

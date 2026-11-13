@@ -82,7 +82,7 @@ class YtDlpTranscriptAdapter:
         common = {
             "quiet": True,
             "no_warnings": True,
-            "skip_download": True,
+            "skip_download": True,\n            "noplaylist": True,
             "socket_timeout": self.socket_timeout,
             "retries": 0,
             "fragment_retries": 0,
@@ -145,7 +145,7 @@ class YtDlpTranscriptAdapter:
             message = str(exc).lower()
             if any(token in message for token in ("429", "too many requests", "rate limit")):
                 status, code = "blocked", "RATE_LIMITED"
-            elif any(token in message for token in ("403", "forbidden", "captcha", "verify you are", "challenge")):
+            elif any(token in message for token in ("403", "forbidden", "captcha", "verify you are", "not a bot", "sign in to confirm", "challenge")):
                 status, code = "blocked", "ACCESS_CHALLENGE"
             else:
                 status, code = "failed", "EXTRACTION_FAILED"

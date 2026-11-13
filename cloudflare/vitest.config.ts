@@ -10,6 +10,7 @@ export default defineWorkersConfig({
       workers: {
         wrangler: { configPath: "./wrangler.toml" },
         miniflare: {
+          ratelimits: { LOGIN_RATE_LIMITER: { simple: { limit: 5, period: 60 } } },
           bindings: { TEST_MIGRATIONS: migrations, OWNER_PASSWORD: "test-owner-password-only", SESSION_SECRET: "test-session-secret-at-least-32-characters-long" },
         },
       },

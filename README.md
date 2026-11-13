@@ -73,3 +73,8 @@ See [Cloudflare setup and API notes](cloudflare/README.md) and the current [engi
 
 
 **Authentication update (2026-11-14):** PR [#18](https://github.com/mayiaskusth-rgb/ksk-asset/pull/18) implements the no-Access owner-password flow. It is not merged or live yet. Cloudflare Workers Builds is being configured with repository root `cloudflare` and Worker name `ksk-research-api`. Do not deploy until PR #18 is approved/merged, CI passes, and runtime secrets plus login rate limiting are configured. No remote D1 migration or live transcript test has happened.
+
+
+### Worker login protection
+
+The Cloudflare persistence API includes a Cloudflare Workers Rate Limiting binding for login attempts (5 per 60 seconds per client IP per Cloudflare location). The limit is approximate and location-local, not a strict global limit. See `cloudflare/README.md` and `youtube-intelligence/HANDOFF.md` for deployment gates and verification status.

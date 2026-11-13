@@ -5,10 +5,10 @@ const APP_ORIGIN = "https://mayiaskusth-rgb.github.io";
 const TEST_PASSWORD = "test-owner-password-only";
 let sessionToken = "";
 
-async function login(password = TEST_PASSWORD): Promise<Response> {
+async function login(password = TEST_PASSWORD, clientIp = "198.51.100.10"): Promise<Response> {
   return SELF.fetch("https://worker.test/api/auth/login", {
     method: "POST",
-    headers: { "content-type": "application/json", Origin: APP_ORIGIN },
+    headers: { "content-type": "application/json", Origin: APP_ORIGIN, "cf-connecting-ip": clientIp },
     body: JSON.stringify({ password }),
   });
 }
@@ -43,11 +43,22 @@ describe("KSK private research API", () => {
   });
 
   it("rejects incorrect passwords and issues short-lived sessions for the owner", async () => {
-    const bad = await login("incorrect-password");
+    const bad = await login("incorrect-password", "198.51.100.11");
     expect(bad.status).toBe(401);
-    const good = await login();
+    const good = await login(TEST_PASSWORD, "198.51.100.12");
     expect(good.status).toBe(200);
     expect(await good.json()).toMatchObject({ expires_in: 1200 });
+  });
+
+  it("rate limits repeated login attempts from one client IP", async () => {
+    const ip = "198.51.100.77";
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const response = await login("incorrect-password", ip);
+      expect(response.status).toBe(401);
+    }
+    const blocked = await login(TEST_PASSWORD, ip);
+    expect(blocked.status).toBe(429);
+    expect(await blocked.json()).toMatchObject({ error: "too_many_login_attempts" });
   });
 
   it("saves, deduplicates, versions, and retrieves transcripts through authenticated Worker routes", async () => {

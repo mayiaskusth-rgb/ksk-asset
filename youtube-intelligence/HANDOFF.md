@@ -940,3 +940,8 @@ The static Research Explorer update has therefore been published through the exi
 - Worker deployment / remote D1 migration / live transcript: **not done**.
 
 This section supersedes earlier handoff statements that Cloudflare Access is the selected authentication path. Keep earlier entries as historical checkpoints, but use this section and live GitHub state for current work.
+
+
+## 26. Worker login rate limiting update — 2026-11-14
+
+A follow-up branch `feature/worker-login-rate-limit` adds Cloudflare's Workers Rate Limiting binding to `POST /api/auth/login` (5 attempts per 60 seconds per client IP, per Cloudflare location). This is approximate/eventually consistent, not a strict global cap. It is an additional abuse-control layer, not a substitute for strong secrets. CI and deployment status must be verified from the live PR and workflow runs. The currently deployed Worker is not protected by this code until the change is merged and deployed. Do not configure production secrets or enable `workers.dev` until the rate-limit update is merged, deployed, and verified.

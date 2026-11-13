@@ -173,7 +173,7 @@ export default {
           (transcript_id, video_id, revision, status, source_type, source_provider, language_code, caption_type, content_text, content_sha256)
           VALUES (?, ?, 1, 'available', 'manual', 'manual_paste', ?, 'unknown', ?, ?)`)
           .bind(transcriptId, transcriptMatch[1], language, content, hash).run();
-        return json({ transcript_id: transcriptId, revision: 1, unchanged: false, updated: false });
+        return json({ transcript_id: transcriptId, revision: 1, unchanged: false, updated: false }, 201);
       } catch {
         return json({ error: "could_not_save_transcript_video_must_exist_first" }, 400);
       }

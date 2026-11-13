@@ -1,8 +1,8 @@
 """Isolated diagnostic adapter using youtube-transcript-api.
 
 This provider is intentionally separate from the production yt-dlp adapter.
-It performs one selected-video fetch, uses no browser cookies or proxies, and
-normalizes only timestamped caption snippets into the shared contract.
+It fetches one selected video's requested-language captions and normalizes
+timestamped snippets into the shared transcript contract.
 """
 from __future__ import annotations
 
@@ -25,11 +25,7 @@ class YouTubeTranscriptApiAdapter:
 
             fetched = YouTubeTranscriptApi().fetch(video_id, languages=[language])
             segments = tuple(
-                TranscriptSegment(
-                    start_seconds=float(item.start),
-                    duration_seconds=float(item.duration),
-                    text=str(item.text),
-                )
+                TranscriptSegment(float(item.start), float(item.duration), str(item.text))
                 for item in fetched
                 if str(item.text).strip()
             )
@@ -44,11 +40,9 @@ class YouTubeTranscriptApiAdapter:
                 source=source,
                 language=getattr(fetched, "language_code", language),
                 caption_type="auto_generated" if getattr(fetched, "is_generated", False) else "creator_provided",
-                subtitle_format="api_snippets",
                 segments=segments,
             )
         except Exception as exc:
-            # Class-name mapping avoids leaking provider exception text into reports.
             error_name = type(exc).__name__.lower()
             message = str(exc).lower()
             if any(token in error_name or token in message for token in (

@@ -359,9 +359,12 @@ Compare discovery quality, outlier quality, audience insights, evidence coverage
 
 Every iteration requires: objective, acceptance criteria, implementation, tests, real experiment where applicable, failure analysis, documentation, and a verified commit.
 
-### Iteration 0 — Architecture and data contracts <badge-placeholder>
+### Iteration 0 — Architecture and data contracts [COMPLETE]
 - Audit existing code, tests, README, workflow, and repository state.
-- Conduct the required public GitHub repository reconnaissance across all eight categories; inspect source, licenses, maintenance, data sources, tests, and policy constraints.\n- Create `docs/repo_landscape.md` and `docs/tooling_landscape.md` with explicit adopt/wrap/borrow/prototype/reject decisions.\n- Compare direct Python/API integration with MCP and custom implementation; identify reusable components and avoid rebuilding commodity plumbing.\n- Investigate relevant outlier tools/extensions and hosted research products.
+- Conduct the required public GitHub repository reconnaissance across all eight categories; inspect source, licenses, maintenance, data sources, tests, and policy constraints.
+- Create `docs/repo_landscape.md` and `docs/tooling_landscape.md` with explicit adopt/wrap/borrow/prototype/reject decisions.
+- Compare direct Python/API integration with MCP and custom implementation; identify reusable components and avoid rebuilding commodity plumbing.
+- Investigate relevant outlier tools/extensions and hosted research products.
 - Define module boundaries and data models.
 - Define source adapter interfaces and provenance requirements.
 - Specify outlier scoring and comparability constraints.

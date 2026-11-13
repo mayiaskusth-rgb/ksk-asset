@@ -1,89 +1,55 @@
-# Transcript Collection — Design Note
+# Transcript Collection — Design and Experiment
 
-**Status:** Planned; not yet implemented  
-**Current search adapter:** yt-dlp  
-**Constraint:** No paid transcript API and no video/audio download in the first pass. See [transcript tools reconnaissance](transcript_tools_reconnaissance.md) for the point-in-time repo review and license decisions.
+**Current implementation:** Optional yt-dlp captions-only adapter and a bounded satellite probe runner are implemented on draft PR #11. **Live retrieval has not yet been run.** The first experiment is opt-in through GitHub Actions; it is not part of ordinary CI.
 
-## Preferred first route: yt-dlp subtitle extraction
+## First controlled sample
 
-**Selection status:** Preferred prototype, not yet implemented or validated. Keep it behind a provider-neutral adapter and test parsing/normalization locally before any live collection.
+The first selected video is the longest result in the original satellite discovery run:
 
-The existing probe already uses yt-dlp for public search metadata. It can be extended for selected video URLs to inspect available captions and, when available, save subtitle files without downloading the video:
+| Selection | Video | Channel | Duration |
+|---|---|---|---:|
+| Default | [The Fundamentals of Satellite Communications Webinar](https://www.youtube.com/watch?v=efjBiVN_N3M) | Norsat International | 59:14 |
+| Optional second | [The Power of These Satellites Is Deeply Troubling](https://www.youtube.com/watch?v=jo8Z4UzIBQk) | Astrum Extra | 48:17 |
 
-- Inspect caption tracks: \`yt-dlp --list-subs VIDEO_URL\`
-- Creator-provided captions: \`--write-subs\`
-- Automatically generated captions: \`--write-auto-subs\`
-- Restrict languages: \`--sub-langs "en.*,en"\`
-- Avoid video download: \`--skip-download\`
-- Prefer a parseable subtitle format: \`--sub-format "vtt/best"\`
+The default experiment runs one video. The optional `both` selection runs the two sequentially. A blocked/rate-limited response stops the sequence immediately. These are selected test cases, not a representative sample of YouTube.
 
-Official yt-dlp options reference: https://github.com/yt-dlp/yt-dlp#subtitle-options
+## How to run after the workflow is available on main
 
-## Alternative: youtube-transcript-api
+1. Open the repository's **Actions** tab.
+2. Select **Satellite transcript probe**.
+3. Choose `norsat-webinar` for the first one-video test. Choose `both` only after reviewing the first result.
+4. Run the workflow and inspect the `satellite-transcript-probe-* ` artifact.
 
-The open-source \`youtube-transcript-api\` package can retrieve available YouTube transcript tracks and timed snippets without downloading video. It relies on YouTube's web interfaces and may be rate-limited or blocked, especially from cloud-hosted IPs.
+The workflow installs the optional `yt-dlp` extra, calls the same adapter used by the CLI, and writes a sanitized JSON report. The report includes status, language, caption type, format, segment count, last timestamp, source method and retrieval time. It deliberately excludes transcript text, excerpts, checksums and raw subtitle files. Full transcript text stays in runner memory and is not uploaded or committed.
 
-Repository: https://github.com/jdepoix/youtube-transcript-api
+## Adapter behaviour and safeguards
 
-Use it as a separately selectable adapter after a small test. Do not build the system around it as the only source.
+- Inspect available caption tracks; prefer creator-provided captions, then auto-generated captions.
+- Use the requested language only; do not silently translate or substitute another explicit regional language.
+- Set skip-download for metadata and subtitle retrieval; no video/audio download.
+- One selected video at a time; no playlist expansion.
+- Zero retries; no cookies, account sessions, proxies or CAPTCHA workarounds.
+- Stop after 403/429 or verification/challenge signals.
+- Never fabricate transcripts. Record `no_captions`, `blocked` or `failed` explicitly.
+- No full transcript is committed to this public repository.
 
-## Required transcript record
+## What this experiment does not prove
 
-- video_id and canonical video URL
-- source adapter and adapter version
-- language code
-- caption type: creator-provided / auto-generated / translated / unknown
-- retrieval timestamp
-- transcript status: retrieved / no captions / unavailable / blocked / failed
-- timestamped segments (start, duration/end, text)
-- raw subtitle file path and normalized transcript path
-- content checksum and normalization version
+A green unit-test run proves the mocked contract and orchestration only. It does not prove live YouTube availability, yt-dlp compatibility with the current YouTube response, transcript completeness, or suitability for analysis. GitHub-hosted runners may themselves be blocked. A blocked result is a valid experiment outcome, not a reason to add bypasses or retries.
 
-## Safety and operating rules
+## Next review gates
 
-- Do not download video or audio as part of transcript retrieval.
-- Do not use cookies, account sessions, proxies, proxy rotation, CAPTCHA bypasses, or access-control workarounds.
-- Use a bounded, sequential batch with caching and zero retries initially.
-- Stop on 403/429, verification/challenge signals, or repeated extractor errors.
-- Do not commit full transcripts to this public repository. Keep local/private run artefacts out of Git; public fixtures should be synthetic or short and rights-safe.
-- Never fabricate a transcript when captions are unavailable. Mark it unavailable and keep the analysis placeholder.
-- Respect source terms, copyright and applicable platform policies. Transcript availability does not itself grant republication rights.
+1. Run the default one-video sample and inspect the sanitized report.
+2. If successful, compare the optional second sample.
+3. Review transcript completeness, language/caption type, timestamp coverage and extraction failures. If full text is needed for analysis, handle it in a private/local environment; do not publish it as a public artifact.
+4. Only after the extractor is reliable, select/build the analyser and test it on the same one or two transcripts.
+5. Expand to a few more videos only after review and fixes. Do not bulk-process the 47-video discovery set yet.
 
+## Related implementation
 
-## First-pass implementation boundary
-
-- Input: one explicitly selected video ID/URL and a bounded language preference.
-- Output: normalized transcript observation with explicit status and provenance, plus timestamped segments only when retrieval succeeds.
-- Preserve both raw-caption timing and normalized segment timing; never silently shift timestamps during cleanup.
-- Prefer creator-provided captions when available; otherwise record auto-generated captions. Do not silently substitute translated captions.
-- Treat subtitle format as an implementation detail. Normalize VTT/JSON3/SRT into the same internal segment representation while retaining source format metadata.
-- Unit tests use synthetic subtitle fixtures and cover rolling-caption duplication, cue overlap, empty captions, malformed timestamps, Unicode, missing language and unavailable-track states.
-- The live experiment is a small sequential sample of already-selected satellite videos, not a broad channel crawl. Cache each result and stop on access challenges or rate limits.
-- The first pass does not run speech-to-text fallback. If captions are unavailable, record that honestly; do not download audio to fill the gap.
-
-
-## Implementation status update (2026-11-13)
-
-The first local normalization slice is now implemented on draft PR #11 in `src/yti/transcripts.py`:
-- provider-neutral transcript observation and segment records;
-- deterministic WebVTT and JSON3 parsers;
-- normalized-content checksum;
-- explicit no-captions state for empty parsed content;
-- synthetic tests, with no network dependency.
-
-This is not yet a YouTube collector. Track discovery, caption selection, retrieval, error mapping, caching and live satellite sampling remain future work. See the latest dated section in `HANDOFF.md`.
-
-
-## Adapter implementation update (2026-11-13)
-
-An optional yt-dlp Python API adapter now exists at `src/yti/transcript_adapter.py`. It:
-- inspects metadata for creator and automatic caption tracks;
-- prefers creator captions, then auto captions, for the requested language only;
-- uses skip-download options for both metadata and caption retrieval;
-- writes caption files to a temporary directory for parsing and cleanup;
-- sets retry counts to zero and maps rate-limit/challenge signals to explicit blocked states;
-- has mocked tests and does not make network calls during CI.
-
-Install the optional dependency with `pip install -e ".[youtube,dev]"`.
-
-**Still pending:** verify CI at the latest branch head; validate yt-dlp's current real output naming and metadata; perform a bounded, opt-in live test against a few already-selected satellite videos. Do not start a live batch until the test suite passes and the adapter's actual skip-download behavior is confirmed.
+- Adapter: `src/yti/transcript_adapter.py`
+- Normalization: `src/yti/transcripts.py`
+- Local single-video CLI: `yti transcript`
+- Bounded probe runner: `scripts/run_transcript_probe.py`
+- Probe workflow: `.github/workflows/satellite-transcript-probe.yml`
+- Mocked tests: `tests/test_transcript_adapter.py`, `tests/test_transcript_probe.py`

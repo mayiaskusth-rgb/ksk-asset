@@ -1,6 +1,6 @@
 # Transcript Collection — Design and Experiment
 
-**Current implementation:** Optional yt-dlp captions-only adapter and a bounded satellite probe runner are implemented on draft PR #11. **Live retrieval has not yet been run.** The first experiment is opt-in through GitHub Actions; it is not part of ordinary CI.
+**Current implementation:** The yt-dlp captions-only adapter and bounded satellite probe are merged into main. The first live run (GitHub Actions run 43466201180) was blocked by YouTube with a sign-in/bot-verification challenge. The workflow handled the challenge safely and uploaded only a sanitized report. A second, explicitly separate youtube-transcript-api diagnostic is being added on branch diagnostic/youtube-transcript-api-comparison; it is not an automatic fallback and does not alter the yt-dlp path.
 
 ## First controlled sample
 
@@ -53,3 +53,23 @@ A green unit-test run proves the mocked contract and orchestration only. It does
 - Bounded probe runner: `scripts/run_transcript_probe.py`
 - Probe workflow: `.github/workflows/satellite-transcript-probe.yml`
 - Mocked tests: `tests/test_transcript_adapter.py`, `tests/test_transcript_probe.py`
+
+
+## Live experiment result — 2026-11-13
+
+The first yt-dlp run used GitHub-hosted Ubuntu 24.04 (Azure westus3) and yt-dlp 2026.10.26. YouTube returned: Sign in to confirm you’re not a bot. No transcript segments were returned, no retry was attempted, and no raw transcript was uploaded. This establishes that this particular hosted-runner request was challenged; it does not establish that all videos or networks are blocked.
+
+## Separate provider diagnostic
+
+A second manual workflow, Transcript provider diagnostic (separate), uses the open-source youtube-transcript-api package independently against one selected sample. It is not called by the yt-dlp adapter or probe and never runs automatically after a block.
+
+- Workflow: .github/workflows/transcript-provider-diagnostic.yml
+- Adapter: src/yti/transcript_api_adapter.py
+- Runner: src/yti/transcript_api_diagnostic.py
+- Optional install: pip install -e .[transcript-diagnostic]
+- The workflow defaults to the same Norsat video and permits the Astrum sample as a separate one-video choice.
+- It uploads only sanitized metadata/status; transcript text is not persisted.
+- No browser cookies, account sessions, proxies, CAPTCHA workarounds or automatic retry/fallback.
+- A block from both providers would be evidence about this runner, not proof that every network is blocked.
+
+Run the Norsat sample once, inspect the report, and decide the next experiment from the evidence.

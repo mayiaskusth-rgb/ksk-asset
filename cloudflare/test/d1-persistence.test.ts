@@ -1,16 +1,25 @@
 import { env } from "cloudflare:test";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 const videoId = "d1Persist01";
 
 describe("D1 persistence contract", () => {
+  beforeEach(async () => {
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO videos (video_id, canonical_url, title) VALUES (?, ?, ?)",
+    ).bind(videoId, `https://www.youtube.com/watch?v=${videoId}`, "D1 persistence fixture").run();
+    await env.DB.prepare(
+      "INSERT OR IGNORE INTO project_videos (project_id, video_id, added_via) VALUES ('default', ?, 'manual')",
+    ).bind(videoId).run();
+  });
   it("persists a canonical video and project membership", async () => {
     await env.DB.prepare(
-      "INSERT INTO videos (video_id, canonical_url, title) VALUES (?, ?, ?)",
+      `INSERT INTO videos (video_id, canonical_url, title) VALUES (?, ?, ?)
+       ON CONFLICT(video_id) DO UPDATE SET title = excluded.title`,
     ).bind(videoId, `https://www.youtube.com/watch?v=${videoId}`, "D1 persistence test").run();
 
     await env.DB.prepare(
-      "INSERT INTO project_videos (project_id, video_id, added_via) VALUES ('default', ?, 'manual')",
+      "INSERT OR IGNORE INTO project_videos (project_id, video_id, added_via) VALUES ('default', ?, 'manual')",
     ).bind(videoId).run();
 
     const saved = await env.DB.prepare(

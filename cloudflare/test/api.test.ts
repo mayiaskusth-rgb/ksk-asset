@@ -94,7 +94,7 @@ describe("KSK private research API", () => {
       return (await response.json() as { token: string }).token;
     })());
     const response = await SELF.fetch("https://worker.test/api/videos/efjBiVN_N3M", {
-      headers: { authorization: "Bearer " + token.slice(0, -1) + (token.endsWith("a") ? "b" : "a") },
+      headers: { authorization: "Bearer " + token.split(".")[0] + "." + (token.split(".")[1][0] === "a" ? "b" : "a") + token.split(".")[1].slice(1) },
     });
     expect(response.status).toBe(401);
   });

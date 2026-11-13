@@ -863,3 +863,34 @@ The user wants to take videos already present in the YouTube Research Run Explor
 6. Update this handoff and README with actual CI/deployment/test evidence. Do not claim live completion before that round trip passes.
 
 The user asked to move quickly, but the safety boundary remains: no public unauthenticated API, no remote migration/deployment without approval, and no credentials in chat.
+
+
+
+---
+
+## 24. PR #17 merged — current transcript persistence milestone — 2026-11-14
+
+### Merged work
+
+- PR [#17](https://github.com/mayiaskusth-rgb/ksk-asset/pull/17) merged to main. Merge commit: f755d4da8e7c24bfa4c1bd6f4d89f62cda1939df.
+- Existing Research Run Explorer shortlist now has a Transcript tab for each selected video. User pastes the transcript copied manually from YouTube; the UI uses the selected video's existing YouTube ID/title/channel, so there is no second shortlist or separate manual video-entry workflow.
+- UI provides Worker API URL configuration, transcript textarea, language code, save and retrieval of transcript revisions. Worker URL is stored in browser localStorage; transcript text is sent to Cloudflare, not committed to GitHub.
+- Worker adds CORS response/preflight support restricted to https://mayiaskusth-rgb.github.io. CORS is not authentication. Private routes still validate Cloudflare Access JWT and fail closed.
+- Authenticated integration tests cover video upsert, transcript save, duplicate idempotency, changed-content revision and latest-first retrieval. Tests invoke the Worker handler directly with a simulated edge-injected Access assertion and stubbed JWKS fetch because the Workers test harness filters the reserved cf-access-jwt-assertion header from normal SELF.fetch requests.
+- Python UI contract tests were updated for the new Transcript tab controls.
+- Final PR-head CI passed: Cloudflare run [43509893658](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509893658), Python run [43509893760](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509893760).
+
+### Still not live
+
+- Main-branch workflows on merge commit f755d4da8e7c24bfa4c1bd6f4d89f62cda1939df (Cloudflare API checks, Python tests, GitHub Pages deploy) were in progress at the time of this update; recheck them.
+- Cloudflare Access app/policy is not configured; ACCESS_TEAM_DOMAIN and ACCESS_AUD in cloudflare/wrangler.toml remain placeholders.
+- Worker is not deployed. Remote D1 migration has not been applied. No transcript has been uploaded to the live database.
+- Cross-origin browser CORS/Access cookie behavior has not been tested on Android. GitHub Pages and workers.dev are different sites; third-party cookie restrictions may require a same-origin/custom-domain design.
+
+### Remaining exact goal
+
+Complete one live round trip on Android: open an existing shortlisted video, paste one manually copied YouTube transcript, save to Cloudflare D1, retrieve it, resubmit identical text (no new revision), and edit it (new revision). Verify unauthenticated reads/writes are rejected. Do not start automated transcript extraction again.
+
+### Owner approval boundary
+
+The user asked to close implementation work quickly; PR #17 has been merged. This does not authorize a public API, auth bypass, remote D1 migration, Worker deployment, or entering payment details. Obtain explicit approval before any remote migration or deployment. Never request tokens/passwords/card details in chat and do not ask the Android-only user to run terminal commands.

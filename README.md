@@ -61,8 +61,12 @@ The engine must be developed and tested as a Python product. Manual web searches
 
 
 
-## Private persistence API (Cloudflare)
+## Private transcript persistence (Cloudflare)
 
-A first private persistence API implementation is available for review in draft PR [#14](https://github.com/mayiaskusth-rgb/ksk-asset/pull/14), with local D1 contract tests proposed in draft PR [#16](https://github.com/mayiaskusth-rgb/ksk-asset/pull/16). Neither PR is merged or deployed.
+The private Worker/D1 persistence layer and its local integration coverage are being completed in draft PR [#17](https://github.com/mayiaskusth-rgb/ksk-asset/pull/17). The existing [YouTube Research Run Explorer](research.html) now includes a Transcript tab on each shortlisted video: paste a transcript copied manually from YouTube, save it against that video's canonical YouTube ID, and retrieve saved revisions. The transcript text is sent to the Worker and is not written into this public repository.
 
-The Worker currently provides health, canonical video save/retrieval, and manually pasted transcript revision endpoints. Private routes currently require Cloudflare Access JWT validation. The owner has created the development D1 database, but has not created an Access application or deployed/migrated the Worker. The Access onboarding prompted for payment details; do not ask the owner to provide card details. A secure owner-only authentication approach compatible with the account constraints is still a prerequisite. See [Cloudflare setup and API notes](cloudflare/README.md) and the dated checkpoint in [the engineering handoff](youtube-intelligence/HANDOFF.md).
+The Worker API supports canonical video upsert, manual transcript save, idempotent duplicate detection, revision history and retrieval. The Explorer stores only the non-secret Worker base URL in the browser. Browser requests are restricted by CORS to the GitHub Pages origin; CORS is not authentication. Private API routes still require Cloudflare Access JWT validation.
+
+**Current gate:** PR #17's CI is being rerun after correcting a base64url encoding defect in the authenticated integration test. Do not merge until CI is green on the latest PR head. The Cloudflare Access application/policy is not configured, the Worker is not deployed, and the remote D1 migration has not been applied. Therefore the new UI is implemented but the real phone-to-Cloudflare round trip is not yet available. Do not make the API public or bypass authentication to speed this up.
+
+See [Cloudflare setup and API notes](cloudflare/README.md) and the current [engineering handoff](youtube-intelligence/HANDOFF.md) for the exact deployment/authentication gate.

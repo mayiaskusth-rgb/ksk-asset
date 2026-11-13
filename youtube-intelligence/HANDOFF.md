@@ -818,3 +818,48 @@ Do not broaden scope. Do not start automated transcript extraction again: both t
 ### Instructions for the next chat
 
 Begin by checking the latest PRs and Actions; do not rely on old run statuses. Then continue only with the narrow engineering sequence above. The user's latest authorised work was documentation only. If the user asks to proceed with implementation, continue in small increments and do not merge or deploy without explicit approval.
+
+---
+
+## 23. Manual transcript UI implementation checkpoint — 2026-11-14
+
+This is the latest checkpoint and supersedes earlier statements that no persistence UI exists.
+
+### User's immediate objective
+
+The user wants to take videos already present in the YouTube Research Run Explorer shortlist, manually copy each transcript from YouTube, paste it into that selected video's Transcript tab, save it to Cloudflare D1, and retrieve it later. Do not create a second shortlist or require manual video ID entry.
+
+### Implemented on branch feat/youtube-intelligence-next-phase
+
+- Draft PR [#17](https://github.com/mayiaskusth-rgb/ksk-asset/pull/17), base main.
+- Latest known branch head at this checkpoint: f23b71f977b26159ce57a557ba04e32acf3d7229 (confirm live before acting; documentation commits may advance it).
+- cloudflare/test/api.test.ts: authenticated Worker integration coverage for video upsert, transcript save, duplicate idempotency, changed-content revision and retrieval. Initial CI failure exposed a base64url regex defect (ReferenceError: g is not defined); the helper was corrected to use string-based replaceAll.
+- research.html: Transcript tab now has Worker URL configuration, manual transcript textarea, language code, save action, and revision retrieval/display. It uses the selected shortlist record's existing video ID/title/channel. The Worker URL is stored in browser localStorage; transcript content is sent to the Worker, not to GitHub.
+- cloudflare/src/index.ts: CORS response/preflight support added for the exact GitHub Pages origin https://mayiaskusth-rgb.github.io. This does not replace authentication.
+- Root README.md updated to describe this flow and current deployment gate.
+
+### CI status at checkpoint
+
+- Earlier PR #17 run [43508014143](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43508014143) failed because the test's base64url helper had over-escaped regexes. The D1 migration succeeded and the existing D1 persistence test file passed (5 tests); the API suite failed during token generation before its assertions.
+- The fix commit triggered run [43508718240](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43508718240), which also failed; inspect its log if needed.
+- Subsequent commits triggered runs [43508825016](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43508825016), [43508866261](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43508866261), and [43508893636](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43508893636). At the time of this checkpoint they were in progress/queued. Recheck current Actions and the exact latest PR head; do not infer success from an earlier commit's run.
+
+### Remaining live integration gates
+
+- PR #17 remains draft/open until CI passes on the latest head. Do not merge without explicit owner approval.
+- Cloudflare Access application and policy are still not configured; Access variables in cloudflare/wrangler.toml are placeholders. The API must remain private. No auth bypass or public unauthenticated write route is acceptable.
+- Worker has not been deployed and remote D1 migration has not been applied. No live transcript has been saved.
+- The Explorer's browser-to-Worker CORS and Cloudflare Access behavior must be verified after a secure Access setup. The Worker CORS allowlist is fixed to the GitHub Pages origin. Cloudflare Access may need its preflight/CORS handling configured so unauthenticated OPTIONS requests can reach the Worker; never weaken the actual GET/POST auth policy.
+- A cross-site browser session between GitHub Pages (github.io) and the Worker (workers.dev) may be affected by browser third-party-cookie restrictions. Test this explicitly on the user's Android browser before declaring the flow operational. If it fails, prefer a same-origin/custom-domain architecture or another secure design; do not store long-lived credentials in public JavaScript or localStorage.
+- The Worker URL is entered in the Transcript tab and stored in browser localStorage. It is a public endpoint identifier, not a secret.
+
+### Next actions
+
+1. Check CI for the latest PR #17 head and diagnose any remaining failures. If runs are stale, use the latest branch SHA, not the PR merge commit from an earlier attempt.
+2. Once CI is green, ask for/obtain explicit approval before merging PR #17. Keep deployment separate.
+3. Resolve secure Access and browser CORS/cookie behavior without requesting payment details or asking the user to share secrets in chat.
+4. Only with explicit approval, apply the remote D1 migration and deploy the Worker.
+5. Test on Android with one existing shortlisted video: save transcript, retrieve it, save identical content (no new revision), edit it (new revision).
+6. Update this handoff and README with actual CI/deployment/test evidence. Do not claim live completion before that round trip passes.
+
+The user asked to move quickly, but the safety boundary remains: no public unauthenticated API, no remote migration/deployment without approval, and no credentials in chat.

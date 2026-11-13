@@ -1,0 +1,1 @@
+"""Replaceable source-provider adapters."""

@@ -494,3 +494,41 @@ If two ideas return nearly identical video sets, refine their scope or merge the
 Implement a configurable LLM provider adapter and persist prompt/model/run metadata. Then implement official YouTube Data API search and metadata hydration with quota accounting. For the first run, 20 search queries are within the documented default 100 \`search.list\` calls/day bucket, but pagination and retries consume additional calls. Keep result counts configurable and record partial failures.
 
 Do not proceed to transcript analysis until the outlier shortlist is based on actual creator baselines, not absolute views or YouTube search rank.
+
+
+## 14. Active no-API search probe — safety and execution contract (2026-11-13)
+
+The user has chosen to test a conservative no-API extraction path for the satellite experiment. The intent is occasional research during development, with the option to replace the adapter with the official YouTube API later. Do not treat this intent as permission to bypass platform restrictions.
+
+### Implemented probe
+
+- Adapter: `src/yti/providers/yt_dlp_probe.py`
+- Tests: `tests/test_yt_dlp_probe.py`
+- Experiment notes: `docs/experiments/satellite_no_api_probe.md`
+- Optional dependency: `pip install -e ".[probe]"`
+- Local command from this module directory: `python -m yti.providers.yt_dlp_probe`
+
+### Hard safeguards
+
+1. One first-choice query per idea (ten queries maximum in the initial run).
+2. Exactly five search results per query.
+3. Sequential query execution; ten-second pause between uncached queries.
+4. yt-dlp request sleep settings enabled.
+5. No API key, login, browser cookies, proxy, proxy rotation, CAPTCHA workaround, or access-control bypass.
+6. Zero retries.
+7. Successful queries are cached locally and not fetched again on later runs.
+8. HTTP 403/429, sign-in/verification/CAPTCHA challenge, timeout, or extractor error stops the entire run. No alternate identity, IP, endpoint, or extraction tool may be used to continue after a block.
+9. Do not download video, audio, subtitles, or thumbnails in this probe.
+10. Preserve query provenance, retrieval timestamp, returned metadata, request count, and stop reason. Local raw run outputs are git-ignored and must be reviewed before any sharing.
+
+The ten-second pause is a conservative experiment setting, not an approved platform rate or a guarantee against throttling. Anonymous access does not guarantee that an IP will not be throttled.
+
+### Current honest status
+
+The adapter and mocked unit tests are implemented. **No live YouTube extraction has been executed from the engineering environment.** The user must run the command locally and share the generated JSON/report or terminal output for empirical evaluation. Do not describe the extractor as working until that evidence is reviewed.
+
+### Next action
+
+Run the bounded probe once in the user's local environment. Evaluate query success/failure, relevant-result rate, unique videos, cross-query duplicates, metadata completeness, and stop reason. Do not expand volume, collect channel histories, or retrieve transcripts until this first search stage is reviewed. If any access restriction is encountered, stop and document it; do not retry or evade it.
+
+This no-API probe is an experimental source adapter. Keep the existing scoring MVP and all provider-neutral contracts intact. The official YouTube API can be implemented later as a separate adapter without changing downstream contracts.

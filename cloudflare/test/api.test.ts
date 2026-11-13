@@ -2,9 +2,10 @@ import { SELF, env } from "cloudflare:test";
 import { describe, expect, it } from "vitest";
 
 const APP_ORIGIN = "https://mayiaskusth-rgb.github.io";
+const TEST_PASSWORD = "test-owner-password-only";
 let sessionToken = "";
 
-async function login(password = env.OWNER_PASSWORD): Promise<Response> {
+async function login(password = TEST_PASSWORD): Promise<Response> {
   return SELF.fetch("https://worker.test/api/auth/login", {
     method: "POST",
     headers: { "content-type": "application/json", Origin: APP_ORIGIN },

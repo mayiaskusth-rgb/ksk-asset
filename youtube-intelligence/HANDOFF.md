@@ -712,3 +712,17 @@ A second design review identified and addressed these points on the PR branch:
 - The initial deployment is single-user/private. Multi-tenant ownership and authorization are not implied by this schema and would require an explicit design before multiple users are supported.
 
 Remaining implementation gates: execute the full D1 schema against SQLite/D1 in CI; test foreign-key enforcement and atomic review updates; define API payload/size limits and input validation; verify transcript revision semantics (including duplicate content); verify Access-protected API requests from the mobile browser. This PR remains design/schema only and must not be deployed as-is.
+
+
+## Cloudflare first persistence API — 2026-11-13
+
+Implementation branch: `feat/cloudflare-first-persistence-api`.
+
+A first Worker slice is being added under `cloudflare/`:
+- TypeScript Worker with Cloudflare Access JWT signature/issuer/audience/expiry validation for all private API routes.
+- `GET /health`, `POST /api/videos`, `GET /api/videos/{video_id}`, and `POST /api/videos/{video_id}/transcripts`.
+- D1 migration seeds a default research project; manual transcript saves are SHA-256 deduplicated and changed content creates a new revision.
+- Transcript request limit is 512 KiB. No CORS or public Pages integration yet.
+- Local Vitest/Workers tests cover health, unauthenticated denial and D1 migration seeding.
+
+Do not deploy until the owner creates the development D1 database and Cloudflare Access application, fills the Wrangler placeholders, and explicitly authorizes deployment. The live D1 save/retrieve/revision flow and mobile Access session behavior remain to be tested. No transcript content or credentials belong in this public repository.

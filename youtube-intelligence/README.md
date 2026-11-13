@@ -4,7 +4,7 @@ An independent Python research-engineering product for YouTube topic discovery, 
 
 This module lives in the public `ksk-asset` repository but is **not a KSK story-development agent**. See the repository root README for the boundary and [HANDOFF.md](HANDOFF.md) for the full product specification and engineering instructions.
 
-**Current status:** MVP foundation preserved. Iteration 0 architecture, data contracts and reuse reconnaissance are being established on `work/youtube-intelligence-iteration-0`. The executable MVP still uses local fixture data and deterministic scoring. Live YouTube discovery, channel-baseline collection, transcript/comment analysis, adaptive research and full opportunity reporting are future iterations.
+**Current status (2026-11-13):** MVP and Iteration 0 foundation are preserved and merged into `main`. The active design branch is `research/transcript-intelligence-foundation`. It adds transcript-tool reconnaissance, a transcript-intelligence analysis contract, an output-schema proposal, and updated handoff/roadmap notes. These are design artefacts only: transcript acquisition and automated analysis are not implemented or tested yet.
 
 **Research Run Explorer:** The static [explorer](../research.html) displays the first bounded satellite run (10 searches, 50 result slots, 47 unique videos), with per-query positions, provenance, metadata, direct YouTube links and an optional embedded player. Transcript and video-analysis sections are explicit placeholders until those stages are implemented.
 
@@ -77,19 +77,31 @@ A views-to-subscriber ratio is a separate metric from creator-relative outlier s
 - `.github/workflows/python-tests.yml` — test suite on pushes and pull requests.
 - [`HANDOFF.md`](HANDOFF.md) — complete product vision, architecture, data-source constraints, development expectations, and next-chat instructions.
 
+## Transcript intelligence design
+
+Read these before implementing transcript work:
+- [Transcript collection design](docs/experiments/transcript_collection.md) — captions-only acquisition, provenance, status handling and safety boundaries.
+- [Transcript tools reconnaissance](docs/experiments/transcript_tools_reconnaissance.md) — public repositories inspected and explicit reuse decisions.
+- [Transcript Intelligence Agent](docs/agents/TRANSCRIPT_INTELLIGENCE_AGENT.md) — analysis dimensions, evidence rules and report structure.
+- [Transcript analysis output contract](docs/transcript_analysis_schema.md) — proposed structured report fields and pacing semantics.
+
+The intended analysis covers concepts, multi-label content format, narrative mode, hook/open loops/payoff, structure, explanation techniques, tone/rhetoric, speech rate, information density, narrative pace, memorable moments and reusable techniques. These are separate dimensions, not one quality score. Transcript-only analysis must not claim visual editing, music, delivery energy, retention or causal performance effects.
+
 ## Roadmap
 
 1. [x] Deterministic outlier scoring and report generation.
 2. [x] Automated tests on GitHub Actions.
-3. [ ] Iteration 0: architecture, data contracts, scoring methodology, and systematic public GitHub/tool landscape review with build-vs-reuse decisions. See [HANDOFF.md](HANDOFF.md).
+3. [x] Iteration 0: architecture, data contracts, scoring methodology, and public GitHub/tool landscape review with build-vs-reuse decisions.
 4. [ ] YouTube metadata discovery adapter.
 5. [ ] Creator baseline builder and format/age-aware comparisons.
 6. [ ] Views-to-subscriber and improved creator-relative outlier analysis.
 7. [ ] Adaptive research strategist that refines discovery from broad topic briefs.
-8. [ ] Transcript adapter with source, language, and timestamp provenance.
+8. [ ] Transcript adapter with source, language, timestamp provenance, bounded collection and quality checks.
 9. [ ] Thumbnail/frame observation workflow.
 10. [ ] Comment-theme and audience-question analysis using permitted, privacy-conscious samples.
-11. [ ] Comparative storytelling analysis and evidence-backed opportunity reports.
+11. [ ] Transcript intelligence reports and comparative storytelling analysis with timestamped evidence; then evidence-backed opportunity reports.
 12. [ ] Reproducible end-to-end experiments on barcode, camera evolution, and satellites.
 13. [ ] Reliability improvements: caching, retries, logging, quota/cost controls, and versioned reports.
 14. [ ] Consider a dashboard only after the CLI research engine is reliable.
+
+**Immediate next work:** implement and test the smallest captions-only transcript adapter spike behind a provider-neutral contract. First run it against a bounded sample of already-selected satellite videos; compare available caption tracks, transcript quality and failure states. Do not start automated LLM analysis until the collector and normalized transcript artefact are trustworthy.

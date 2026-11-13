@@ -1,53 +1,70 @@
 # KSK Cloudflare Persistence
 
-Private persistence API for the independent YouTube Audience Intelligence Engine. It is a separate backend layer; it does not replace GitHub, the existing GitHub Pages site, or the Python research runtime.
+Private persistence API for the independent YouTube Audience Intelligence Engine. It is a separate backend layer; it does not replace GitHub, the GitHub Pages site, or the Python research runtime.
 
 ## System boundaries
 
 - **GitHub:** source code, version history, pull requests and CI.
-- **GitHub Pages:** existing static Asset Gallery and Research Run Explorer.
-- **Research Explorer:** existing shortlist UI; the Transcript tab now accepts manually pasted transcript text for the selected video and requests save/retrieval through the Worker.
-- **Cloudflare Worker:** private API only.
-- **Cloudflare D1:** private structured persistence.
+- **GitHub Pages:** static Asset Gallery and Research Run Explorer.
+- **Research Explorer:** selected-video Transcript tab for manually pasted transcript input and retrieval.
+- **Cloudflare Worker:** authenticated API and request validation.
+- **Cloudflare D1:** private structured persistence for video metadata and transcript text.
 - **Python / GitHub Actions:** research and analysis execution.
 
-The YouTube Intelligence Engine is independent from the private KSK editorial workflow. No automated integration is implied.
+The YouTube Intelligence Engine is independent from the private KSK editorial workflow. It is not a KSK agent and there is no automated runtime integration.
 
-## API contract
+## Runtime resources
 
-- `GET /health`: non-sensitive liveness response.
-- `POST /api/videos`: upsert a canonical YouTube video and associate it with a project (default project when omitted).
-- `GET /api/videos/{video_id}`: return video metadata and transcript revisions, newest first.
-- `POST /api/videos/{video_id}/transcripts`: save manually pasted transcript text.
-- Identical content compared with the latest revision is idempotent; changed content creates a new revision. Reverting to older content creates a new revision rather than rewriting history.
-- Transcript request body limit: 512 KiB. Responses are marked `no-store`.
-- Private routes require an owner password exchanged for a 20-minute HMAC-signed bearer session. The password and signing key are Cloudflare Worker secrets; the browser keeps the short-lived token in memory only. Missing/invalid configuration fails closed.
-- CORS allows only the GitHub Pages origin `https://mayiaskusth-rgb.github.io`, with the Authorization header. CORS is not authentication and does not permit unauthenticated API access.
+- Worker: `ksk-research-api`
+- Worker URL: https://ksk-research-api.mayiaskusth.workers.dev
+- Worker source/configuration: `cloudflare/src/index.ts`, `cloudflare/wrangler.toml`
+- D1 database: `ksk-research-dev`
+- D1 database ID: `31c27fa9-cd26-4ac2-867d-710096093dad`
+- D1 migrations: `cloudflare/migrations/`
+- Manually gated remote migration workflow: `.github/workflows/d1-migrate-remote.yml`
 
-## Current repository status — 2026-11-14
+The remote migration workflow was run by the user. The D1 migration ledger showed `0001_initial.sql` applied, and the application tables were visible in the remote database.
 
-- PR [#17](https://github.com/mayiaskusth-rgb/ksk-asset/pull/17) was merged to main as commit `f755d4da8e7c24bfa4c1bd6f4d89f62cda1939df`. It contains authenticated Worker integration tests, the existing-shortlist transcript UI, CORS handling, and documentation updates.
-- The UI uses the selected shortlist record's existing YouTube ID/title/channel. It offers a Worker API URL field, transcript textarea, language code, save action and revision retrieval. The Worker URL is stored in browser localStorage; transcript content is sent to Cloudflare, not committed to GitHub.
-- Python CI passed for the updated explorer/test contract on head `60e3fdc7600df823be5ea87294f8b9d460fd1256` (run [43509321262](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509321262)). The Explorer test was updated to expect the new transcript controls.
-- Cloudflare API CI passed on final PR head `5df01cf74072209bf6772d58fbeda7e5a5ea018b` (run [43509893658](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509893658)). The authenticated test invokes the Worker handler directly, simulates the edge-injected Access assertion, and stubs the JWKS fetch; production authentication code is unchanged.
-- Python CI passed on the same PR head (run [43509893760](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509893760)).
-- PR #17 is merged. Main-branch Cloudflare API checks, Python tests and GitHub Pages deployment all passed for merge commit `f755d4da8e7c24bfa4c1bd6f4d89f62cda1939df` (runs [43509948988](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509948988), [43509949086](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509949086), and [43509949087](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509949087)).
-- Earlier PRs #14 and #16 were consolidated into the branch/PR #17 development line; use the live PR state rather than old handoff entries when checking merge status.
+## API and authentication
 
-## Cloudflare account and authentication constraints
+- `GET /health`: minimal public liveness response.
+- `POST /api/auth/login`: validates `OWNER_PASSWORD` and returns a short-lived signed session.
+- Private video/transcript API routes require a valid bearer session.
+- Session lifetime: 20 minutes; HMAC-SHA256 signature uses `SESSION_SECRET`.
+- Runtime secrets `OWNER_PASSWORD` and `SESSION_SECRET` are configured as Cloudflare Worker secrets. Never put their values in Wrangler config, GitHub, the browser, README files, or chat.
+- The Explorer stores the session token in tab-scoped `sessionStorage`; it does not persist the owner password.
+- Login rate limiting uses a Cloudflare Workers Rate Limiting binding: 5 attempts per 60 seconds per client IP per Cloudflare location. This is approximate/eventually consistent and location-local, not a strict global limit.
+- CORS allows only `https://mayiaskusth-rgb.github.io` and the required Authorization header. CORS is not authentication.
+- `workers.dev` is currently enabled and reachable. Do not describe it as disabled.
 
-The owner-created development D1 database is:
+## Transcript editor behaviour
 
-- Name: `ksk-research-dev`
-- Database ID: `31c27fa9-cd26-4ac2-867d-710096093dad`
+The live Explorer is https://mayiaskusth-rgb.github.io/ksk-asset/research.html.
 
-The ID is an identifier, not a credential. It is configured in `wrangler.toml`.
+- The Worker URL is built into the page; the user does not configure it in the UI.
+- The Transcript tab uses the selected shortlist video's existing YouTube ID/title/channel.
+- Opening the tab retrieves the latest transcript.
+- First save creates the transcript record; identical content is idempotent.
+- Editing and saving updates the latest transcript row in place. The current editor does not create new revision history.
+- Older historical rows, if any, are not deleted by this behaviour. The current retrieval path returns the latest transcript.
+- UI reports saving, unchanged, saved, updated, and failure states.
+- Transcript text is sent to Cloudflare D1 and is not committed to this public repository.
 
-Cloudflare Access onboarding previously requested payment details. The owner declined to provide card details. No Access application/policy is needed for the owner-password design. Do not ask for card details, do not ask for tokens/passwords in chat, and do not expose an unauthenticated public API. Before enabling public use, configure edge rate limiting for `POST /api/auth/login` and set strong random Worker secrets.
+## Verified status — 2026-11-14
+
+- PR #17: initial transcript persistence and UI — merged.
+- PR #18: owner-password authentication — merged.
+- PR #19: login rate limiting — merged.
+- PR #20: manually gated remote D1 migration workflow — merged and run; remote migration/table state checked by the user.
+- PR #21: simplified editor and update-in-place save flow — merged as `ac94ad0cdf0ebab3a753643e03418084fdfa44e2`.
+- Worker dashboard showed deployment Ready; the public health route returned `{"ok":true,"service":"ksk-research-api"}`.
+- User confirmed live end-to-end transcript save, page refresh, and retrieval.
+
+This is a verified basic round trip, not a claim of production-scale reliability or exhaustive security testing.
 
 ## Local development and tests
 
-Requires Node.js 20+ and Wrangler 4. The owner currently uses an Android phone and should not be asked to run local shell commands.
+Requires Node.js 20+ and Wrangler 4. The owner currently uses Android and should not be asked to run local shell commands.
 
 ```sh
 cd cloudflare
@@ -57,34 +74,11 @@ npm test
 npm run dev
 ```
 
-The authenticated Worker integration suite is under active CI verification. Always inspect the latest run on the exact PR head; a passing Python run or older Cloudflare run is not proof that the current API tests pass.
+## Security and operating constraints
 
-## Deployment and first live test — NOT YET DONE
-
-No remote migration, Worker deployment, authenticated live endpoint test, Android browser test, or transcript upload to D1 has happened. The existence of the D1 database does not prove its schema has been applied.
-
-After CI passes and the Worker is deployed with owner-password authentication:
-
-1. Configure Worker secrets `OWNER_PASSWORD` and `SESSION_SECRET` in Cloudflare; never put either in GitHub or browser storage. Use a long unique password and a random signing secret of at least 32 characters.
-2. Configure rate limiting for login attempts at the Cloudflare edge before sharing the endpoint.
-3. Obtain explicit approval before applying the remote D1 migration or deploying the Worker.
-4. Open an existing shortlisted video, paste its YouTube transcript, save it, and retrieve it.
-5. Verify identical text does not create a duplicate revision and edited text creates the next revision.
-6. Verify unauthenticated reads and writes are rejected.
-
-Do not add bulk imports, automated transcript-provider fallback, analysis endpoints, or any public unauthenticated write path in this first persistence slice.
-
-
-## Owner-password authentication update — 2026-11-14
-
-PR [#18](https://github.com/mayiaskusth-rgb/ksk-asset/pull/18) implements an owner-only password exchange for 20-minute HMAC-signed sessions. It replaces the Access JWT dependency and updates the Research Explorer to prompt for the password while retaining the session token in memory only. Required production runtime secrets are `OWNER_PASSWORD` and `SESSION_SECRET` (minimum 32 characters). Configure them as encrypted Worker secrets after deployment; do not add them to `wrangler.toml`, GitHub, or browser storage. Configure edge rate limiting for `POST /api/auth/login` before using the endpoint.
-
-PR #18 is open and CI is pending on its latest head. The Worker is still not deployed; remote D1 migration and live save/retrieve remain unperformed. In Cloudflare Workers Builds, the project/Worker name must be `ksk-research-api` to match Wrangler, and the repository root directory must be `cloudflare`. Keep Cloudflare Access off. The auto-created Workers Builds API token is separate from the runtime Worker secrets.
-
-
-## Login rate limiting — 2026-11-14
-
-- `POST /api/auth/login` uses the Cloudflare Workers Rate Limiting binding, keyed by the edge-provided client IP, with a threshold of 5 attempts per 60 seconds per Cloudflare location.
-- This is an approximate, location-local control; it is not a strict global limit and can be exceeded briefly while counters synchronize. It adds friction to repeated password guessing but does not replace strong unique secrets or monitoring.
-- The binding is configured in `wrangler.toml` as `LOGIN_RATE_LIMITER`. Tests cover repeated failed attempts and a blocked subsequent login.
-- This change must pass CI and be deployed before the protection is live. Do not treat the currently deployed Worker as rate-limited until then.
+- Never add an unauthenticated private read/write route.
+- Never commit Worker secrets, passwords, API tokens, cookies, private transcripts, or personal data.
+- Do not request credentials or payment/card details in chat.
+- Do not run a remote migration or change deployment/security settings without explicit user approval.
+- Keep the supported transcript input path manual copy/paste. Do not repeat automated transcript extraction attempts from GitHub-hosted runners; previous attempts were blocked by YouTube access challenges.
+- Preserve auditability and provenance. Do not silently change transcript persistence semantics or delete existing records.

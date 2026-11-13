@@ -78,7 +78,7 @@ A views-to-subscriber ratio is a separate metric from creator-relative outlier s
 
 1. [x] Deterministic outlier scoring and report generation.
 2. [x] Automated tests on GitHub Actions.
-3. [ ] Iteration 0: architecture, data contracts, source-adapter contracts, scoring methodology, and tool evaluation.
+3. [ ] Iteration 0: architecture, data contracts, scoring methodology, and systematic public GitHub/tool landscape review with build-vs-reuse decisions. See [HANDOFF.md](HANDOFF.md).
 4. [ ] YouTube metadata discovery adapter.
 5. [ ] Creator baseline builder and format/age-aware comparisons.
 6. [ ] Views-to-subscriber and improved creator-relative outlier analysis.

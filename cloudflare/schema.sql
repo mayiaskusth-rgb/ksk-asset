@@ -57,6 +57,24 @@ CREATE TABLE IF NOT EXISTS project_videos (
     PRIMARY KEY (project_id, video_id)
 );
 
+
+-- Append-only human review history. Current state remains on project_videos;
+-- this table preserves every decision transition and its reason/note.
+CREATE TABLE IF NOT EXISTS video_review_events (
+    review_event_id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL,
+    video_id TEXT NOT NULL,
+    previous_decision TEXT CHECK (previous_decision IS NULL OR previous_decision IN ('unreviewed', 'keep', 'drop', 'review_later')),
+    new_decision TEXT NOT NULL CHECK (new_decision IN ('unreviewed', 'keep', 'drop', 'review_later')),
+    reason_code TEXT,
+    reviewer_note TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (project_id, video_id) REFERENCES project_videos(project_id, video_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_review_events_membership
+    ON video_review_events(project_id, video_id, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS research_run_videos (
     run_id TEXT NOT NULL REFERENCES research_runs(run_id),
     video_id TEXT NOT NULL REFERENCES videos(video_id),

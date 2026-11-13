@@ -28,6 +28,7 @@ def test_satellite_run_preserves_query_positions_and_deduplication():
     video_ids = [video["id"] for video in run["videos"]]
     assert len(video_ids) == len(set(video_ids)) == 47
     assert len(run["queries"]) == 10
+    assert [query["idea_id"] for query in run["queries"]] == [f"sat-{i:02d}" for i in range(1, 11)]
     assert sum(len(query["results"]) for query in run["queries"]) == 50
 
     known_ids = set(video_ids)

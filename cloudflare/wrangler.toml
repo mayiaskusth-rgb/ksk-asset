@@ -6,7 +6,7 @@ workers_dev = true
 [[d1_databases]]
 binding = "DB"
 database_name = "ksk-research-dev"
-database_id = "00000000-0000-0000-0000-000000000001"
+database_id = "31c27fa9-cd26-4ac2-867d-710096093dad"
 migrations_dir = "migrations"
 
 [vars]

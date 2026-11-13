@@ -23,21 +23,20 @@ npm test
 npm run dev
 ```
 
-Wrangler configuration has a harmless placeholder D1 UUID and placeholder Access settings. Replace them only after creating the development D1 database and Access application. Do not deploy with placeholder settings. The local tests cover liveness, rejection of unauthenticated private requests and migration seeding. The authenticated save/retrieve/revision flow is the first development-D1 integration check after account setup.
+Wrangler configuration now points to the owner-created development database `ksk-research-dev` (`31c27fa9-cd26-4ac2-867d-710096093dad`). Access settings remain explicit placeholders because the Cloudflare Zero Trust onboarding requested payment details and the owner chose not to provide them. Do not deploy while the Access values are placeholders. Local CI runs the D1 migration against SQLite-backed D1 and exercises the persistence schema; authenticated Worker endpoint success and remote D1 remain unverified.
 
 ## Cloudflare setup (owner action)
 
-1. Create a D1 database named `ksk-research-dev`.
-2. Replace the database ID in `wrangler.toml`.
-3. Create a Cloudflare Access self-hosted application for the Worker hostname; restrict it to the owner's email.
-4. Set `ACCESS_TEAM_DOMAIN` and `ACCESS_AUD` from the Access setup.
-5. Apply the migration to the development database and deploy from this directory only.
+1. The development D1 database `ksk-research-dev` has already been created and its ID is configured in `wrangler.toml`.
+2. Authentication remains the blocker: the current Worker uses Cloudflare Access JWT validation, but no Access application/policy has been created because the account onboarding prompted for card details. Do not ask the owner to enter payment details.
+3. Before deployment, choose and implement a secure owner-only authentication route that does not require paid/verified Zero Trust onboarding, or revisit Access only if the owner independently confirms it is available without payment details.
+4. Only after authentication is configured and reviewed, apply the remote migration and request explicit deployment approval.
 
 No account token, Access secret, transcript or private note belongs in Git. Access JWT validation happens in the Worker as a second enforcement layer; do not expose the Worker API without an Access application and matching audience configured.
 
 ## First manual API experiment
 
-After the development Worker is deployed behind Access, use an authenticated API client/browser session to:
+After the development Worker is securely authenticated and deployment is explicitly approved, use an authenticated API client/browser session to:
 1. POST one video ID to `/api/videos`.
 2. POST a manually copied transcript to `/api/videos/{id}/transcripts`.
 3. GET `/api/videos/{id}` and verify revision 1 is present.

@@ -24,7 +24,7 @@ function decodeBase64Url(value: string): Uint8Array {
 
 async function accessClaims(request: Request, env: Env): Promise<AccessClaims | null> {
   const token = request.headers.get("cf-access-jwt-assertion");
-  if (!token || !env.ACCESS_TEAM_DOMAIN || !env.ACCESS_AUD) { console.log("auth-debug missing", Boolean(token), Boolean(env.ACCESS_TEAM_DOMAIN), Boolean(env.ACCESS_AUD)); return null; }
+  if (!token || !env.ACCESS_TEAM_DOMAIN || !env.ACCESS_AUD) return null;
 
   try {
     const [encodedHeader, encodedPayload, encodedSignature] = token.split(".");
@@ -38,7 +38,7 @@ async function accessClaims(request: Request, env: Env): Promise<AccessClaims | 
     const audiences = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
     if (claims.iss !== issuer || !audiences.includes(env.ACCESS_AUD) ||
         typeof claims.exp !== "number" || claims.exp <= now ||
-        (typeof claims.nbf === "number" && claims.nbf > now)) { console.log("auth-debug claims", claims.iss === issuer, audiences.includes(env.ACCESS_AUD), claims.exp, now, claims.nbf); return null; }
+        (typeof claims.nbf === "number" && claims.nbf > now)) return null;
 
     if (!cachedKeys || cachedKeys.expiresAt < now) {
       const response = await fetch(`${issuer}/cdn-cgi/access/certs`);

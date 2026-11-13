@@ -41,10 +41,13 @@ class YtDlpTranscriptAdapter:
 
     @staticmethod
     def _language_match(available: list[str], requested: str) -> str | None:
-        # Exact match first, then a regional variant of the requested base language.
+        # Exact match first. Base-language requests may accept a regional variant;
+        # explicit regional requests never silently cross to another region.
         if requested in available:
             return requested
-        prefix = requested.split("-", 1)[0].lower() + "-"
+        if "-" in requested:
+            return None
+        prefix = requested.lower() + "-"
         return next((lang for lang in sorted(available) if lang.lower().startswith(prefix)), None)
 
     @classmethod

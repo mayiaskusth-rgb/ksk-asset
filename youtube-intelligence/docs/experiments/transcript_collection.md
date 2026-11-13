@@ -1,6 +1,6 @@
 # Transcript Collection — Design and Experiment
 
-**Current implementation:** The yt-dlp captions-only adapter and bounded satellite probe are merged into main. The first live run (GitHub Actions run 43466201180) was blocked by YouTube with a sign-in/bot-verification challenge. The workflow handled the challenge safely and uploaded only a sanitized report. A second, explicitly separate youtube-transcript-api diagnostic is being added on branch diagnostic/youtube-transcript-api-comparison; it is not an automatic fallback and does not alter the yt-dlp path.
+**Current implementation:** The yt-dlp captions-only adapter and bounded satellite probe are merged into main. The first live run (GitHub Actions run 43466201180) was blocked by YouTube with a sign-in/bot-verification challenge. The separate youtube-transcript-api diagnostic is also merged into main and its live run (43468626904) was blocked with an access-challenge/rate-limit result. Both workflows handled the blocks safely and uploaded only sanitized reports. Neither approach retrieved transcript text. Manual browser copy/paste with private persistence is now the next practical path; further extractor tests are paused.
 
 ## First controlled sample
 
@@ -72,7 +72,7 @@ A second manual workflow, Transcript provider diagnostic (separate), uses the op
 - No browser cookies, account sessions, proxies, CAPTCHA workarounds or automatic retry/fallback.
 - A block from both providers would be evidence about this runner, not proof that every network is blocked.
 
-Run the Norsat sample once, inspect the report, and decide the next experiment from the evidence.
+The Norsat sample was tested once with each independent provider approach. Both were blocked from GitHub-hosted runners. Do not repeat these tests or expand to the second sample now. Use a manual browser transcript paste for the first end-to-end persistence and analysis experiment.
 
 ## Live provider comparison result — 2026-11-13
 

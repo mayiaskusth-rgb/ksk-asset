@@ -563,3 +563,17 @@ The first PR #11 CI run failed on an existing research explorer assertion, not o
 5. Use skip-download semantics; never fetch media. Bound request count and timeout, cache only private/local artefacts, perform zero retries initially, and stop on 403/429/challenge signals. Do not use cookies, proxies or bypasses.
 6. Unit tests mock the extractor boundary; no live YouTube calls in CI. Add an opt-in manual experiment command only after tests and error mapping are sound.
 7. Update this handoff and both READMEs as the implementation evolves.
+
+
+## 18. Optional yt-dlp adapter implementation (2026-11-13)
+
+Added on the active PR #11 branch:
+
+- `src/yti/transcript_adapter.py`: `YtDlpTranscriptAdapter` uses yt-dlp's Python API, performs metadata track inspection, prefers creator-provided captions over auto-generated captions, matches only the requested language/base-language regional variants, and retrieves only that track.
+- Both metadata and subtitle retrieval set `skip_download=True`; no video/audio download is intended. Subtitle output is written only into a temporary directory and removed after normalization.
+- No cookies, proxy settings, retries, fragment retries or extractor retries are configured.
+- Maps no matching language track to `no_captions`, rate-limit/access challenge signals to `blocked`, and other extractor problems to `failed`; raw exception text is not exposed in the observation.
+- `pyproject.toml` adds optional extra `youtube = ["yt-dlp>=2025.1.15"]`. Install with `pip install -e ".[youtube,dev]"`.
+- `tests/test_transcript_adapter.py` mocks the yt-dlp Python API to verify manual-caption preference, skip-download options, no language substitution, 429 handling and URL validation.
+
+**Caution:** This adapter has not yet been run against live YouTube. Confirm actual yt-dlp subtitle output behavior (including extension and requested_subtitles metadata) before a live experiment. No claims of live reliability yet. Current CI status must be checked against the latest PR head; test code was added after prior CI runs.

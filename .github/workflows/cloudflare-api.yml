@@ -1,0 +1,33 @@
+name: Cloudflare API checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "cloudflare/**"
+      - ".github/workflows/cloudflare-api.yml"
+  pull_request:
+    paths:
+      - "cloudflare/**"
+      - ".github/workflows/cloudflare-api.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  worker:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cloudflare
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: cloudflare/package-lock.json
+      - name: Install dependencies
+        run: npm install
+      - name: Run Worker tests
+        run: npm test

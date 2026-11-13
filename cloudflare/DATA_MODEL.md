@@ -21,7 +21,7 @@ review_decision values:
 - drop: excluded from future processing, but retained in the database.
 - review_later: deferred for a human decision.
 
-A drop is not a delete. Reconsidering a video changes the decision and preserves the prior state in future audit/event support. Reasons use controlled codes where possible; a free-text note provides context.
+A drop is not a delete. Reconsidering a video changes the current decision on project_videos and appends a row to video_review_events, preserving the prior decision, reason and note. The application must write the state change and event in one D1 batch/transaction so they cannot diverge. Reasons use controlled codes where possible; a free-text note provides context.
 
 Suggested reason codes (not yet enforced as a database enum): not_relevant, repetitive, low_substance, poor_quality, outside_scope, other.
 

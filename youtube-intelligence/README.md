@@ -14,7 +14,7 @@ See:
 - [Satellite idea-generation experiment](docs/experiments/satellite_idea_generation.md)
 - [Structured idea output](data/experiments/satellite_ideas.json)
 
-The next stage is a conservative no-API YouTube search probe using yt-dlp: one query per idea, five results, sequential requests, local caching, no authentication/cookies/proxy, zero retries, and a global stop on access restrictions. See [probe design and run instructions](docs/experiments/satellite_no_api_probe.md). This adapter is implemented and unit-tested with mocked responses; live extraction has not yet been run. Channel baselines and transcript analysis remain later stages. Video/frame analysis is explicitly deferred.
+The first live probe used one query per idea and five results per query, with sequential requests, local caching, no authentication/cookies/proxy, zero retries, and a global stop on access restrictions. See [probe design and run instructions](docs/experiments/satellite_no_api_probe.md) and the [Research Run Explorer](../research.html). It returned 50 result slots and 47 unique videos. Channel baselines and transcript analysis remain later stages. Video/frame analysis is explicitly deferred.
 
 ## Start here
 
@@ -101,4 +101,4 @@ A views-to-subscriber ratio is a separate metric from creator-relative outlier s
 9. [ ] Comparative research report and opportunity hypotheses.
 10. [ ] Later: audience-comment analysis and video/frame analysis, only after the first pipeline proves useful.
 11. [ ] Reliability improvements: caching, retries, logging, quota/cost controls and versioned reports.
-12. [ ] Consider a dashboard only after the CLI research engine is reliable.
+12. [x] Add a static research-run inspection page for validating bounded discovery output; defer a production dashboard until the CLI research engine is reliable.

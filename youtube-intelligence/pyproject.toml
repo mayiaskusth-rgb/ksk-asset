@@ -12,9 +12,11 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+probe = ["yt-dlp>=2025.1.15"]
 
 [project.scripts]
 yti = "yti.cli:main"
+yti-satellite-probe = "yti.providers.yt_dlp_probe:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

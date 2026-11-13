@@ -609,3 +609,8 @@ The adapter now also:
 - maps additional bot-verification wording to the blocked state.
 
 Tests cover single-video scope and strict regional language matching. These changes are pending the newest CI run.
+
+
+### Latest CI debugging note (2026-11-13)
+
+A follow-up adapter-hardening commit initially introduced a literal escaped newline in the options dictionary, causing test collection to fail. The syntax issue was corrected in commit `cfec61f0f310954f9ce821263725f7fe2831aa4e`. The next CI run on that commit must pass before the PR is considered ready. The previous 33-test pass remains valid only for the earlier code state.

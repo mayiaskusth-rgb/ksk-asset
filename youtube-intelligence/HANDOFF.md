@@ -2,7 +2,7 @@
 
 **Purpose:** This is the authoritative product and engineering handoff for the independent YouTube research module in this repository. A new ChatGPT engineering chat should read this file and the current code before making changes.
 
-**Start command for the next chat:** “Go. Read the handoff and repository state, then start Iteration 0.”
+**Start command for the next chat:** “Read the handoff and repository state, verify the Iteration 0 PR status, then plan Iteration 1.”
 
 **Repository:** [mayiaskusth-rgb/ksk-asset](https://github.com/mayiaskusth-rgb/ksk-asset)  
 **Module:** `youtube-intelligence/`  
@@ -337,7 +337,7 @@ Prefer small, composable dependencies over adopting a large application wholesal
 - `tests/test_contracts.py` — deterministic contract validation tests.
 - An explicit **build vs reuse** decision for each major capability and a shortlist of technical spikes.
 
-**Iteration 0 status (2026-11-13):** Complete on `work/youtube-intelligence-iteration-0`. The above documents and additive contracts are present. Existing scoring, IO, report, CLI, fixtures and CI workflow are unchanged. GitHub Actions run [43416775747](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43416775747) completed successfully: package installation, all tests, sample scoring/report pipeline and artifact upload passed.
+**Iteration 0 status (2026-11-13):** Complete on `work/youtube-intelligence-iteration-0`. The above documents and additive contracts are present. Existing scoring, IO, report, CLI, fixtures and CI workflow are unchanged. GitHub Actions run [43420954353](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43420954353) completed successfully: package installation, **13 tests**, sample scoring of 5 videos, Markdown report generation and artifact upload all passed. PR [#1](https://github.com/mayiaskusth-rgb/ksk-asset/pull/1) is open and ready for review; it has not been merged.
 
 The initial scan should be broad enough to avoid tunnel vision, then narrow to a small shortlist for deeper code/license review. Aim to inspect a meaningful spread of candidates across all eight categories; do not pad the inventory with irrelevant repositories just to hit a number.
 
@@ -359,7 +359,7 @@ Compare discovery quality, outlier quality, audience insights, evidence coverage
 
 Every iteration requires: objective, acceptance criteria, implementation, tests, real experiment where applicable, failure analysis, documentation, and a verified commit.
 
-### Iteration 0 — Architecture and data contracts
+### Iteration 0 — Architecture and data contracts <badge-placeholder>
 - Audit existing code, tests, README, workflow, and repository state.
 - Conduct the required public GitHub repository reconnaissance across all eight categories; inspect source, licenses, maintenance, data sources, tests, and policy constraints.\n- Create `docs/repo_landscape.md` and `docs/tooling_landscape.md` with explicit adopt/wrap/borrow/prototype/reject decisions.\n- Compare direct Python/API integration with MCP and custom implementation; identify reusable components and avoid rebuilding commodity plumbing.\n- Investigate relevant outlier tools/extensions and hosted research products.
 - Define module boundaries and data models.
@@ -427,17 +427,13 @@ No dashboard-first approach. No manual-search substitution. No invented metrics.
 
 ## 12. First instruction to the next engineering chat
 
-**Go. Read this handoff and inspect the current repository. Start Iteration 0.**
+**Read this handoff and inspect the current repository. Iteration 0 is complete; plan Iteration 1.**
 
-Specifically:
-1. Inspect the current `main` branch and the existing `youtube-intelligence/` implementation; create a dedicated feature branch.
-2. Confirm the actual repository state, tests, CI, and current scoring behavior.
-3. Investigate relevant outlier extensions/tools and open-source MCP or Python projects.
-4. Identify what can be reused and what should remain our own implementation.
-5. Define the architecture, data contracts, source-adapter contracts, and scoring methodology.
-6. Add Iteration 0 documents and tests in the repository.
-7. Update the relevant READMEs and roadmap.
-8. Commit the documentation/engineering foundation on a dedicated feature branch unless the user explicitly requests otherwise.
-9. Report actual changes, commit SHA, test results, and remaining gaps.
+Next engineering chat should:
+1. Verify PR #1 and whether it has been merged into `main`.
+2. Re-read the current repository state and Iteration 0 architecture/contracts.
+3. Plan Iteration 1 (YouTube search adapter) with explicit source capability, quota, provenance, and test acceptance criteria.
+4. Keep the existing scoring CLI working and do not begin channel baseline work until discovery metadata is reliable.
+5. Use the three broad benchmark subjects only when running real experiments; do not supply finished story arcs.
 
-Do not implement every module immediately. Establish a sound foundation first, preserve the existing MVP, and build iteratively.
+Do not implement every module immediately. Preserve the MVP and build one tested vertical slice at a time.

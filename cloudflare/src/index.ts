@@ -141,7 +141,7 @@ export default {
       }
     }
 
-    const transcriptMatch = url.pathname.match(/^\\/api\\/videos\\/([A-Za-z0-9_-]{11})\\/transcripts$/);
+    const transcriptMatch = url.pathname.match(/^\/api\/videos\/([A-Za-z0-9_-]{11})\/transcripts$/);
     if (transcriptMatch && request.method === "POST") {
       const body = await readJson(request, 600 * 1024);
       if (!body || typeof body.content_text !== "string" || !body.content_text.trim()) {

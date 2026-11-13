@@ -625,3 +625,29 @@ The regional-language test then exposed that the intended helper replacement had
 ### Verification after adapter hardening — 2026-11-13
 
 GitHub Actions run [43460851620](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43460851620) completed successfully on code commit `ddcf55679ae14880ea085f56a07ffbca046b3b2c`: **34 tests passed**, and the existing sample scoring/report pipeline completed. This includes strict regional-language selection and single-video mode. The later handoff-only commit `bd1b6516d0ec8cc7d9742d41835c7abf917f9942` records the verification; no code changed after the successful run.
+
+
+## 20. Bounded satellite transcript experiment harness (2026-11-13)
+
+Added on the active PR #11 branch:
+
+- `scripts/run_transcript_probe.py` runs one preselected video by default or two selected videos sequentially.
+- Default sample is the longest video in the original 47-video satellite discovery set: Norsat International's 59:14 satellite communications webinar (`efjBiVN_N3M`).
+- Optional second sample is Astrum Extra's 48:17 satellite video (`jo8Z4UzIBQk`). The `both` mode runs these sequentially and stops immediately if the first result is blocked.
+- `.github/workflows/satellite-transcript-probe.yml` provides a manual GitHub Actions workflow. It is opt-in and does not run as part of ordinary CI.
+- The workflow uploads only a sanitized report: video metadata, status, language, caption type, subtitle format, segment count, transcript end timestamp, detail code, source method and retrieval timestamp.
+- Transcript text, excerpts, checksums and raw subtitle payloads are deliberately excluded from the artifact. The full transcript remains in process memory and is not committed or uploaded.
+- `tests/test_transcript_probe.py` verifies default one-video selection, two-video sequential stop-on-block behavior and that transcript text is absent from the report.
+
+**Important validation boundary:** these tests are mocked. The actual GitHub-hosted live workflow has not been dispatched. Once this workflow is merged to `main`, run Actions → Satellite transcript probe → `norsat-webinar` for the first live test. Only if successful should the optional `both` selection be run. GitHub-hosted IP blocking is possible; 403/429/challenge means stop, not bypass.
+
+### Next review gates
+
+1. Merge after CI and code review; verify Pages deployment separately.
+2. Trigger the default one-video workflow and inspect the sanitized artifact.
+3. If successful, run the second video and compare completeness, caption source/language, segment count and timestamp coverage.
+4. Fix adapter issues before selecting/building the analyser.
+5. Test the analyser against the same one or two transcripts in a private/local context.
+6. Expand to a few more only after review. Do not process all 47 yet.
+
+The analyser remains **designed but not selected/implemented as an execution module**. The agent instructions and schema are specifications, not a working automated analyser.

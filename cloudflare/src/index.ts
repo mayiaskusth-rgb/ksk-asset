@@ -1,12 +1,8 @@
 interface Env {
   DB: D1Database;
-  ACCESS_TEAM_DOMAIN: string;
-  ACCESS_AUD: string;
+  OWNER_PASSWORD?: string;
+  SESSION_SECRET?: string;
 }
-
-type AccessClaims = { iss?: string; aud?: string | string[]; exp?: number; nbf?: number; email?: string };
-
-let cachedKeys: { expiresAt: number; keys: JsonWebKey[] } | undefined;
 const APP_ORIGIN = "https://mayiaskusth-rgb.github.io";
 
 function json(data: unknown, status = 200): Response {
@@ -16,49 +12,52 @@ function json(data: unknown, status = 200): Response {
   });
 }
 
+function base64Url(bytes: Uint8Array): string {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/=/g, "").replaceAll("+", "-").replaceAll("/", "_");
+}
+
 function decodeBase64Url(value: string): Uint8Array {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
   const binary = atob(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "="));
   return Uint8Array.from(binary, (char) => char.charCodeAt(0));
 }
 
-async function accessClaims(request: Request, env: Env): Promise<AccessClaims | null> {
-  const token = request.headers.get("cf-access-jwt-assertion");
-  if (!token || !env.ACCESS_TEAM_DOMAIN || !env.ACCESS_AUD) return null;
+async function hmacKey(secret: string): Promise<CryptoKey> {
+  return crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
+}
 
+function constantTimeEqual(left: string, right: string): boolean {
+  const a = new TextEncoder().encode(left);
+  const b = new TextEncoder().encode(right);
+  let difference = a.length ^ b.length;
+  const length = Math.max(a.length, b.length);
+  for (let i = 0; i < length; i++) difference |= (a[i] ?? 0) ^ (b[i] ?? 0);
+  return difference === 0;
+}
+
+async function issueSession(secret: string): Promise<string> {
+  const payload = base64Url(new TextEncoder().encode(JSON.stringify({
+    exp: Math.floor(Date.now() / 1000) + 20 * 60,
+    nonce: crypto.randomUUID(),
+  })));
+  const signature = await crypto.subtle.sign("HMAC", await hmacKey(secret), new TextEncoder().encode(payload));
+  return payload + "." + base64Url(new Uint8Array(signature));
+}
+
+async function validSession(request: Request, secret: string): Promise<boolean> {
+  const authorization = request.headers.get("authorization") ?? "";
+  if (!authorization.startsWith("Bearer ")) return false;
+  const [payload, signature, extra] = authorization.slice(7).split(".");
+  if (!payload || !signature || extra) return false;
   try {
-    const [encodedHeader, encodedPayload, encodedSignature] = token.split(".");
-    if (!encodedHeader || !encodedPayload || !encodedSignature) return null;
-    const header = JSON.parse(new TextDecoder().decode(decodeBase64Url(encodedHeader))) as { alg?: string; kid?: string };
-    const claims = JSON.parse(new TextDecoder().decode(decodeBase64Url(encodedPayload))) as AccessClaims;
-    if (header.alg !== "RS256" || !header.kid) return null;
-
-    const issuer = `https://${env.ACCESS_TEAM_DOMAIN}.cloudflareaccess.com`;
-    const now = Math.floor(Date.now() / 1000);
-    const audiences = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
-    if (claims.iss !== issuer || !audiences.includes(env.ACCESS_AUD) ||
-        typeof claims.exp !== "number" || claims.exp <= now ||
-        (typeof claims.nbf === "number" && claims.nbf > now)) return null;
-
-    if (!cachedKeys || cachedKeys.expiresAt < now) {
-      const response = await fetch(`${issuer}/cdn-cgi/access/certs`);
-      if (!response.ok) return null;
-      const body = await response.json() as { keys?: JsonWebKey[] };
-      if (!Array.isArray(body.keys)) return null;
-      cachedKeys = { keys: body.keys, expiresAt: now + 300 };
-    }
-    const jwk = cachedKeys.keys.find((key) => (key as JsonWebKey & { kid?: string }).kid === header.kid);
-    if (!jwk) return null;
-    const publicKey = await crypto.subtle.importKey(
-      "jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"],
-    );
-    const valid = await crypto.subtle.verify(
-      "RSASSA-PKCS1-v1_5", publicKey, decodeBase64Url(encodedSignature),
-      new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`),
-    );
-    return valid ? claims : null;
+    const valid = await crypto.subtle.verify("HMAC", await hmacKey(secret), decodeBase64Url(signature), new TextEncoder().encode(payload));
+    if (!valid) return false;
+    const claims = JSON.parse(new TextDecoder().decode(decodeBase64Url(payload))) as { exp?: number; nonce?: string };
+    return typeof claims.exp === "number" && claims.exp > Math.floor(Date.now() / 1000) && typeof claims.nonce === "string";
   } catch {
-    return null;
+    return false;
   }
 }
 
@@ -89,7 +88,7 @@ export default {
         "access-control-allow-origin": APP_ORIGIN,
         "access-control-allow-credentials": "true",
         "access-control-allow-methods": "GET, POST, OPTIONS",
-        "access-control-allow-headers": "content-type, cf-access-jwt-assertion",
+        "access-control-allow-headers": "content-type, authorization",
         "access-control-max-age": "600",
         "vary": "Origin",
       } });
@@ -98,8 +97,21 @@ export default {
       return json({ ok: true, service: "ksk-research-api" });
     }
 
-    const claims = await accessClaims(request, env);
-    if (!claims) return json({ error: "unauthorized" }, 401);
+    if (url.pathname === "/api/auth/login" && request.method === "POST") {
+      if (request.headers.get("Origin") !== APP_ORIGIN) return json({ error: "forbidden_origin" }, 403);
+      if (!env.OWNER_PASSWORD || !env.SESSION_SECRET || env.SESSION_SECRET.length < 32) {
+        return json({ error: "authentication_not_configured" }, 503);
+      }
+      const body = await readJson(request, 4 * 1024);
+      if (!body || typeof body.password !== "string" || !constantTimeEqual(body.password, env.OWNER_PASSWORD)) {
+        return json({ error: "invalid_credentials" }, 401);
+      }
+      return json({ token: await issueSession(env.SESSION_SECRET), expires_in: 1200 });
+    }
+
+    if (!env.SESSION_SECRET || env.SESSION_SECRET.length < 32 || !await validSession(request, env.SESSION_SECRET)) {
+      return json({ error: "unauthorized" }, 401);
+    }
 
     if (url.pathname === "/api/videos" && request.method === "POST") {
       const body = await readJson(request, 16 * 1024);

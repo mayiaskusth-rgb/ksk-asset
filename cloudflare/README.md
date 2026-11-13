@@ -21,8 +21,8 @@ The YouTube Intelligence Engine is independent from the private KSK editorial wo
 - `POST /api/videos/{video_id}/transcripts`: save manually pasted transcript text.
 - Identical content compared with the latest revision is idempotent; changed content creates a new revision. Reverting to older content creates a new revision rather than rewriting history.
 - Transcript request body limit: 512 KiB. Responses are marked `no-store`.
-- Private routes validate Cloudflare Access JWT signature, issuer, audience and expiry. Missing/invalid configuration fails closed.
-- CORS currently allows the GitHub Pages origin `https://mayiaskusth-rgb.github.io` and credentialed browser requests. CORS is not authentication and does not permit unauthenticated API access.
+- Private routes require an owner password exchanged for a 20-minute HMAC-signed bearer session. The password and signing key are Cloudflare Worker secrets; the browser keeps the short-lived token in memory only. Missing/invalid configuration fails closed.
+- CORS allows only the GitHub Pages origin `https://mayiaskusth-rgb.github.io`, with the Authorization header. CORS is not authentication and does not permit unauthenticated API access.
 
 ## Current repository status — 2026-11-14
 
@@ -43,7 +43,7 @@ The owner-created development D1 database is:
 
 The ID is an identifier, not a credential. It is configured in `wrangler.toml`.
 
-Cloudflare Access onboarding previously requested payment details. The owner declined to provide card details. No Access application/policy exists and the Access team/audience values remain placeholders. Do not ask for card details, do not ask for tokens/passwords in chat, do not deploy while authentication is unresolved, and do not expose an unauthenticated public API.
+Cloudflare Access onboarding previously requested payment details. The owner declined to provide card details. No Access application/policy is needed for the owner-password design. Do not ask for card details, do not ask for tokens/passwords in chat, and do not expose an unauthenticated public API. Before enabling public use, configure edge rate limiting for `POST /api/auth/login` and set strong random Worker secrets.
 
 ## Local development and tests
 
@@ -63,10 +63,10 @@ The authenticated Worker integration suite is under active CI verification. Alwa
 
 No remote migration, Worker deployment, authenticated live endpoint test, Android browser test, or transcript upload to D1 has happened. The existence of the D1 database does not prove its schema has been applied.
 
-After CI passes and a secure Access/browser architecture is established:
+After CI passes and the Worker is deployed with owner-password authentication:
 
-1. Confirm Access can protect the Worker and support browser requests from the GitHub Pages origin without weakening GET/POST authorization.
-2. Test preflight handling and third-party cookie behavior on Android. If cross-site Access cookies do not work, prefer a same-origin/custom-domain architecture; do not store long-lived credentials in public JavaScript or localStorage.
+1. Configure Worker secrets `OWNER_PASSWORD` and `SESSION_SECRET` in Cloudflare; never put either in GitHub or browser storage. Use a long unique password and a random signing secret of at least 32 characters.
+2. Configure rate limiting for login attempts at the Cloudflare edge before sharing the endpoint.
 3. Obtain explicit approval before applying the remote D1 migration or deploying the Worker.
 4. Open an existing shortlisted video, paste its YouTube transcript, save it, and retrieve it.
 5. Verify identical text does not create a duplicate revision and edited text creates the next revision.

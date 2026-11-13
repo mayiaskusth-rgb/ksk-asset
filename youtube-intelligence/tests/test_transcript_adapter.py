@@ -79,3 +79,17 @@ def test_adapter_rejects_non_youtube_urls():
             video_id="vid", video_url="https://example.com/video",
             language="en", retrieved_at="2026-11-13T10:00:00Z",
         )
+
+
+def test_adapter_uses_auto_captions_only_when_creator_track_absent(monkeypatch):
+    class AutomaticOnly(FakeYDL):
+        info = {"subtitles": {}, "automatic_captions": {"en": [{"ext": "vtt"}]}}
+    monkeypatch.setattr(YtDlpTranscriptAdapter, "_yt_dlp", staticmethod(lambda: SimpleNamespace(YoutubeDL=AutomaticOnly)))
+    result = YtDlpTranscriptAdapter().fetch(
+        video_id="vid", video_url="https://www.youtube.com/watch?v=vid",
+        language="en", retrieved_at="2026-11-13T10:00:00Z",
+    )
+    assert result.status == "retrieved"
+    assert result.caption_type == "auto_generated"
+    assert AutomaticOnly.calls[-1]["writesubtitles"] is False
+    assert AutomaticOnly.calls[-1]["writeautomaticsub"] is True

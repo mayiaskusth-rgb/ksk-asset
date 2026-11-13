@@ -50,7 +50,7 @@ The Python project lives in [`youtube-intelligence/`](youtube-intelligence/).
 
 Its purpose is to discover audience demand, identify videos that outperform their creators' normal performance, analyze storytelling and audience signals, and produce evidence-backed opportunity reports.
 
-**Current status:** The existing MVP and Iteration 0 foundation are preserved. PR #1 and the research-explorer/layout PRs are merged into `main`. A new branch, `research/transcript-intelligence-foundation`, is documenting transcript-tool reconnaissance, collection boundaries, and an evidence-backed transcript-analysis rubric. No transcript collector or automated transcript analysis is implemented yet.
+**Current status:** The existing MVP and Iteration 0 foundation are preserved. PR #1 and the research-explorer/layout PRs are merged into `main`. Draft PR [#11](https://github.com/mayiaskusth-rgb/ksk-asset/pull/11) on `research/transcript-intelligence-foundation` documents transcript-tool reconnaissance, collection boundaries, and an evidence-backed transcript-analysis rubric. No transcript collector or automated transcript analysis is implemented yet.
 
 Start with:
 - [YouTube Intelligence README](youtube-intelligence/README.md) — current capabilities, setup, and roadmap.

@@ -1,4 +1,5 @@
 import { fetchMock, SELF, env } from "cloudflare:test";
+import worker from "../src/index";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const keyId = "ksk-api-integration-test-key";
@@ -47,7 +48,7 @@ async function createAccessToken(): Promise<string> {
 async function authenticatedFetch(path: string, init: RequestInit = {}): Promise<Response> {
   const headers = new Headers(init.headers);
   headers.set("cf-access-jwt-assertion", authorization);
-  return SELF.fetch(`https://worker.test${path}`, { ...init, headers });
+  return worker.fetch(new Request(`https://worker.test${path}`, { ...init, headers }), env);
 }
 
 describe("KSK private research API", () => {

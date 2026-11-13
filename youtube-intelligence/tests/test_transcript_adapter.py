@@ -40,7 +40,7 @@ def test_adapter_prefers_creator_captions_and_sets_skip_download(monkeypatch):
     assert result.status == "retrieved"
     assert result.caption_type == "creator_provided"
     assert result.segments[0].text == "Hello"
-    assert FakeYDL.calls[0]["skip_download"] is True
+    assert FakeYDL.calls[0]["skip_download"] is True\n    assert FakeYDL.calls[0]["noplaylist"] is True
     assert FakeYDL.calls[1]["skip_download"] is True
     assert FakeYDL.calls[1]["writesubtitles"] is True
     assert FakeYDL.calls[1]["writeautomaticsub"] is False
@@ -93,3 +93,8 @@ def test_adapter_uses_auto_captions_only_when_creator_track_absent(monkeypatch):
     assert result.caption_type == "auto_generated"
     assert AutomaticOnly.calls[-1]["writesubtitles"] is False
     assert AutomaticOnly.calls[-1]["writeautomaticsub"] is True
+
+
+def test_language_match_does_not_cross_requested_region():
+    assert YtDlpTranscriptAdapter._language_match(["en-GB", "en-US"], "en") == "en-GB"
+    assert YtDlpTranscriptAdapter._language_match(["en-GB"], "en-US") is None

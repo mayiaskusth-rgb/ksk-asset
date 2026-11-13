@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 
 from yti.io import load_videos, write_csv
 from yti.report import write_report
@@ -21,6 +22,12 @@ def build_parser() -> argparse.ArgumentParser:
     report = commands.add_parser("report", help="Generate Markdown report from scored CSV")
     report.add_argument("--input", required=True, help="Input scored CSV")
     report.add_argument("--output", required=True, help="Output Markdown path")
+
+    transcript = commands.add_parser("transcript", help="Collect captions for one video (optional yt-dlp extra)")
+    transcript.add_argument("--video-id", required=True)
+    transcript.add_argument("--url", required=True)
+    transcript.add_argument("--language", default="en")
+    transcript.add_argument("--output", required=True, help="Private/local JSON output path")
     return parser
 
 
@@ -32,6 +39,25 @@ def main() -> None:
         scored = score_videos(rows, minimum_baseline_sample=args.minimum_baseline_sample)
         write_csv(scored, args.output)
         print(f"Scored {len(scored)} videos -> {args.output}")
+        return
+
+    if args.command == "transcript":
+        from dataclasses import asdict
+        from datetime import datetime, timezone
+        from pathlib import Path
+
+        from yti.transcript_adapter import YtDlpTranscriptAdapter
+
+        observation = YtDlpTranscriptAdapter().fetch(
+            video_id=args.video_id,
+            video_url=args.url,
+            language=args.language,
+            retrieved_at=datetime.now(timezone.utc).isoformat(),
+        )
+        destination = Path(args.output)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(json.dumps(asdict(observation), ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"Transcript status: {observation.status} -> {destination}")
         return
 
     if args.command == "report":

@@ -2,7 +2,7 @@
 
 **Purpose:** This is the authoritative product and engineering handoff for the independent YouTube research module in this repository. A new ChatGPT engineering chat should read this file and the current code before making changes.
 
-**Start command for the next chat:** “Read the handoff and repository state, verify the Iteration 0 PR status, then plan Iteration 1.”
+**Start command for the next chat:** “Read the handoff and current branch/PR state. Continue the transcript intelligence foundation from the latest dated handoff section; do not restart completed UI work or assume transcript collection is implemented.”
 
 **Repository:** [mayiaskusth-rgb/ksk-asset](https://github.com/mayiaskusth-rgb/ksk-asset)  
 **Module:** `youtube-intelligence/`  
@@ -469,3 +469,190 @@ The public repository's existing root `index.html` is the KSK Visual Asset Libra
 - Upload dates were unavailable in the first run.
 - Channel IDs are intentionally omitted from the public display fixture; raw workflow artifact retains the full extractor output for seven days.
 - The current fixture is a snapshot; it does not establish view velocity or historical performance.
+
+
+## 16. Transcript intelligence foundation — latest handoff (2026-11-13)
+
+**Active branch:** `research/transcript-intelligence-foundation` ([draft PR #11](https://github.com/mayiaskusth-rgb/ksk-asset/pull/11))  
+**Base:** current `main` after PR #10 (expanded watch-page alignment).  
+**Status:** Design/reconnaissance work in progress. This branch is not merged. No transcript collector, automated analysis runtime, new Python dependency, or dashboard work has been implemented.
+
+### User-approved direction
+
+Proceed in two distinct capabilities:
+
+1. **Transcript acquisition:** retrieve captions for selected videos; preserve source, language, caption type, timestamped segments, retrieval status and provenance. No media download in the first pass.
+2. **Transcript intelligence:** explain the subject/concepts, content format, narrative mode, hook/open loops/payoff, structure, explanation techniques, tone/rhetoric, pacing, strong moments and reusable techniques.
+
+The user wants a practical research tool, not a generic summarizer or an opaque video-quality score. Keep the existing `VIDEO_ANALYSIS_AGENT.md` as the broader video communication analysis contract; the new transcript-specific contract gives more detail for transcript-derived signals.
+
+### New design files on this branch
+
+- `docs/agents/TRANSCRIPT_INTELLIGENCE_AGENT.md` — versioned analysis instructions and evidence rules.
+- `docs/transcript_analysis_schema.md` — proposed provider-neutral structured output; conceptual v0.1, not yet JSON Schema or Python models.
+- `docs/experiments/transcript_tools_reconnaissance.md` — inspected repositories, license notes, constraints and reuse decisions.
+- `docs/experiments/transcript_collection.md` — acquisition design; now links the reconnaissance and selected first spike.
+- Module README updated with current status, links, roadmap and immediate next work.
+- Root README updated to identify this branch and avoid stale Iteration 0 status.
+
+### Public repository reconnaissance (checked 2026-11-13)
+
+1. [youtube-transcript-extractor](https://github.com/GregHabiskis/youtube-transcript-extractor): describes yt-dlp captions-only collection, creator-caption preference, JSON3/VTT/SRT parsing, rolling-caption cleanup and timestamps. GitHub metadata showed no declared license; pyproject requires Python 3.14, while our package targets Python 3.11+. **Borrow design only; do not copy or depend on it.**
+2. [analyze-video](https://github.com/eruto-skills/analyze-video): MIT; skill describes full-transcript macro/micro structure, hook, information density, hedging, credibility, re-engagement, memorable phrasing, contrast and closing, with unscored evidence-led comparison. **Borrow analytical design; no runtime dependency.**
+3. [youtube-transcriber](https://github.com/nickholdenproper/youtube-transcriber): Python CLI/GUI/API; captions, local Whisper fallback, Ollama analysis, optional visual/voice passes. Its custom Free-to-Use License is not a permissive OSI license; audio fallback downloads media and cloud Ollama conflicts with our initial constraints. **Borrow architecture ideas only; do not adopt or copy code.**
+
+Full findings and links are in `docs/experiments/transcript_tools_reconnaissance.md`.
+
+### Analysis principles agreed
+
+- Use a **multi-label** content-format taxonomy: documentary, mystery/reveal, investigative, educational explainer, narrative essay, case study, tutorial/demo, listicle, commentary, interview, review/comparison, news, personal story, compilation/reaction, mixed/other.
+- Also identify narrative mode separately: chronological, question-led, problem-solution, claim-evidence, thematic, episodic, list-based, etc.
+- Keep three pacing concepts separate: speech rate (WPM), information density (new concepts/claims), and narrative pace (frequency of section/question/story-beat changes).
+- Caption timestamps can be coarse or unreliable; report method and quality caveats. Transcript alone cannot establish visual editing pace, cuts, music, silence, vocal energy, retention, CTR or causal performance effects.
+- Every claim about a hook, structure, moment or technique needs timestamp evidence.
+- Separate observation, interpretation and hypothesis. No invented content and no opaque quality score.
+- Compare individual reports only after a small batch exists; compare like with like (topic, format, duration, caption quality, publication age). Small samples yield hypotheses, not universal truths.
+
+### Constraints unchanged
+
+- No paid LLM API calls.
+- No video/audio downloads in the first pass.
+- No cookies, account sessions, proxies, proxy rotation, CAPTCHA bypasses or access-control workarounds.
+- Bounded sequential requests, caching, zero retries initially; stop on 403/429/challenge.
+- No full transcripts or private run artefacts in this public repository.
+- Do not introduce Whisper, Ollama, embeddings, a database, MCP runtime or new UI in this design phase.
+- Preserve the existing Python MVP and all earlier research explorer/layout work.
+
+### Next engineering steps
+
+1. Update `docs/experiments/transcript_collection.md` to link reconnaissance and record the selected first spike: yt-dlp subtitle-only adapter, subject to a bounded local test and current policy review.
+2. Inspect existing `pyproject.toml`, contracts and CLI before implementation. Propose a minimal `TranscriptObservation` / `TranscriptSegment` contract that can represent retrieved, no-captions, unavailable, blocked and failed states.
+3. Build a captions-only adapter with deterministic tests using synthetic VTT/JSON3 fixtures; never require live YouTube for unit tests.
+4. Add a manual, bounded real-data experiment against a few selected satellite videos only after local tests pass. Record track availability, caption type, language, timestamps, coverage, errors and stop conditions; keep raw transcript output private.
+5. Validate transcript quality checks and report output. Only then run a human/model-assisted analysis pilot on 3–5 videos and revise the rubric from user feedback.
+6. Update module README, root README and this handoff in every material PR. Keep branch/PR/commit/test/experiment status explicit.
+
+**Next chat must start from this section and inspect the branch.** Do not claim this branch is merged or that transcript acquisition/analysis is working until code, tests and a bounded experiment establish that.
+
+
+## 17. First transcript code increment (2026-11-13)
+
+The branch now contains the first executable transcript foundation:
+
+- `src/yti/transcripts.py`
+  - `TranscriptSegment`: start, duration, end property and non-empty text validation.
+  - `TranscriptObservation`: video ID, explicit status (retrieved / no_captions / unavailable / blocked / failed), source provenance, language, caption type, source format, segments and normalized-content SHA-256.
+  - `parse_vtt`: deterministic WebVTT cue parser; strips markup, decodes entities, preserves cue timing and sorts by start.
+  - `parse_json3`: deterministic YouTube JSON3 event parser; preserves millisecond offsets/durations and joins text fragments.
+  - `make_transcript_observation`: returns a truthful no_captions state for empty parsed content.
+  - No network calls and no third-party dependencies.
+- `tests/test_transcripts.py`: synthetic tests for VTT, JSON3, timing, markup/entities, empty captions, status invariants and checksum.
+
+**Not implemented:** yt-dlp retrieval adapter, language-track discovery/selection, live collection, retries/cache, transcript quality scoring, analysis execution. Parser tests have been added but CI for the latest branch commit must be checked before claiming they pass.
+
+### CI correction discovered
+
+The first PR #11 CI run failed on an existing research explorer assertion, not on transcript code: `tests/test_research_explorer_data.py` expected the literal labels “Not collected yet” and “Not analysed yet”, while the expanded watch-page markup had changed the wording. This was corrected in `research.html` without changing functionality. Verify the next CI run against the latest head.
+
+### Next implementation slice
+
+1. Verify the current PR head and CI.
+2. Review parser edge cases; add any missing deterministic tests.
+3. Add a yt-dlp adapter using its Python API (not shell interpolation), isolated behind a small interface. Keep yt-dlp an optional/runtime dependency only if the package design supports it cleanly; otherwise add an explicit pinned-compatible dependency and document it.
+4. Adapter should first list caption tracks, prefer creator-provided captions, then optionally auto captions; never silently choose translated captions. Return language/caption type/source format accurately.
+5. Use skip-download semantics; never fetch media. Bound request count and timeout, cache only private/local artefacts, perform zero retries initially, and stop on 403/429/challenge signals. Do not use cookies, proxies or bypasses.
+6. Unit tests mock the extractor boundary; no live YouTube calls in CI. Add an opt-in manual experiment command only after tests and error mapping are sound.
+7. Update this handoff and both READMEs as the implementation evolves.
+
+
+## 18. Optional yt-dlp adapter implementation (2026-11-13)
+
+Added on the active PR #11 branch:
+
+- `src/yti/transcript_adapter.py`: `YtDlpTranscriptAdapter` uses yt-dlp's Python API, performs metadata track inspection, prefers creator-provided captions over auto-generated captions, matches only the requested language/base-language regional variants, and retrieves only that track.
+- Both metadata and subtitle retrieval set `skip_download=True`; no video/audio download is intended. Subtitle output is written only into a temporary directory and removed after normalization.
+- No cookies, proxy settings, retries, fragment retries or extractor retries are configured.
+- Maps no matching language track to `no_captions`, rate-limit/access challenge signals to `blocked`, and other extractor problems to `failed`; raw exception text is not exposed in the observation.
+- `pyproject.toml` adds optional extra `youtube = ["yt-dlp>=2025.1.15"]`. Install with `pip install -e ".[youtube,dev]"`.
+- `tests/test_transcript_adapter.py` mocks the yt-dlp Python API to verify manual-caption preference, skip-download options, no language substitution, 429 handling and URL validation.
+
+**Caution:** This adapter has not yet been run against live YouTube. Confirm actual yt-dlp subtitle output behavior (including extension and requested_subtitles metadata) before a live experiment. No claims of live reliability yet. Current CI status must be checked against the latest PR head; test code was added after prior CI runs.
+
+
+## 19. One-video transcript CLI (2026-11-13)
+
+Added `yti transcript` to the existing CLI:
+```bash
+yti transcript --video-id VIDEO_ID --url YOUTUBE_URL --language en --output runs/private/VIDEO_ID.transcript.json
+```
+- Uses the optional yt-dlp adapter.
+- Writes a structured JSON observation (including segments and provenance) to the caller-specified local path.
+- Creates parent directories and prints only the status/path.
+- CLI test mocks the adapter and verifies JSON output.
+- The command does not add a public fixture or commit transcript data. The user/operator must keep output in a private local path.
+
+Next: verify latest CI; confirm current yt-dlp API output details before live use; run only a tiny sequential satellite sample with no retries and stop on access challenges. The adapter/CLI are not yet experimentally validated against YouTube.
+
+
+### Verification update — 2026-11-13
+
+GitHub Actions run [43459990611](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43459990611) completed successfully on commit `4bb8905f4c8d7ba11eade85c7346548e930f992a`: **31 tests passed**, and the existing sample scoring/report pipeline completed. This run includes the parser, adapter and CLI tests. Subsequent commits in this branch are documentation-only; a workflow for the newest README commit `375e14b4cd10a06c4ea71eecc2d2c0b462e78839` is queued and must be checked before final PR review.
+
+Earlier failures on this branch were due to the existing explorer placeholder-string assertion. The page wording was corrected, and later runs passed.
+
+
+### Adapter hardening follow-up (2026-11-13)
+
+The adapter now also:
+- sets `noplaylist=True` so a supplied URL cannot expand into a playlist batch;
+- allows regional variants only when the requested language is a base code (e.g. `en`); an explicit regional request (e.g. `en-US`) must match exactly;
+- maps additional bot-verification wording to the blocked state.
+
+Tests cover single-video scope and strict regional language matching. These changes are pending the newest CI run.
+
+
+### Latest CI debugging note (2026-11-13)
+
+A follow-up adapter-hardening commit initially introduced a literal escaped newline in the options dictionary, causing test collection to fail. The syntax issue was corrected in commit `cfec61f0f310954f9ce821263725f7fe2831aa4e`. The next CI run on that commit must pass before the PR is considered ready. The previous 33-test pass remains valid only for the earlier code state.
+
+
+The next run exposed a second literal escaped-newline typo in the new adapter test assertion (not application code). It was corrected in commit `dbd366b20987ef17e485a67304c2cf7abd65e25a`. The latest run must be checked again; do not cite the earlier 33-test result as validation of these newest edits.
+
+
+The regional-language test then exposed that the intended helper replacement had not actually applied; the old fallback remained. The helper was replaced explicitly in commit `ddcf55679ae14880ea085f56a07ffbca046b3b2c`. Verify the next CI run before proceeding. This was a test-detected behavior bug: explicit regional requests could have fallen back to a different region, which is now intended to be disallowed.
+
+
+### Verification after adapter hardening — 2026-11-13
+
+GitHub Actions run [43460851620](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43460851620) completed successfully on code commit `ddcf55679ae14880ea085f56a07ffbca046b3b2c`: **34 tests passed**, and the existing sample scoring/report pipeline completed. This includes strict regional-language selection and single-video mode. The later handoff-only commit `bd1b6516d0ec8cc7d9742d41835c7abf917f9942` records the verification; no code changed after the successful run.
+
+
+## 20. Bounded satellite transcript experiment harness (2026-11-13)
+
+Added on the active PR #11 branch:
+
+- `scripts/run_transcript_probe.py` runs one preselected video by default or two selected videos sequentially.
+- Default sample is the longest video in the original 47-video satellite discovery set: Norsat International's 59:14 satellite communications webinar (`efjBiVN_N3M`).
+- Optional second sample is Astrum Extra's 48:17 satellite video (`jo8Z4UzIBQk`). The `both` mode runs these sequentially and stops immediately if the first result is blocked.
+- `.github/workflows/satellite-transcript-probe.yml` provides a manual GitHub Actions workflow. It is opt-in and does not run as part of ordinary CI.
+- The workflow uploads only a sanitized report: video metadata, status, language, caption type, subtitle format, segment count, transcript end timestamp, detail code, source method and retrieval timestamp.
+- Transcript text, excerpts, checksums and raw subtitle payloads are deliberately excluded from the artifact. The full transcript remains in process memory and is not committed or uploaded.
+- `tests/test_transcript_probe.py` verifies default one-video selection, two-video sequential stop-on-block behavior and that transcript text is absent from the report.
+
+**Important validation boundary:** these tests are mocked. The actual GitHub-hosted live workflow has not been dispatched. Once this workflow is merged to `main`, run Actions → Satellite transcript probe → `norsat-webinar` for the first live test. Only if successful should the optional `both` selection be run. GitHub-hosted IP blocking is possible; 403/429/challenge means stop, not bypass.
+
+### Next review gates
+
+1. Merge after CI and code review; verify Pages deployment separately.
+2. Trigger the default one-video workflow and inspect the sanitized artifact.
+3. If successful, run the second video and compare completeness, caption source/language, segment count and timestamp coverage.
+4. Fix adapter issues before selecting/building the analyser.
+5. Test the analyser against the same one or two transcripts in a private/local context.
+6. Expand to a few more only after review. Do not process all 47 yet.
+
+The analyser remains **designed but not selected/implemented as an execution module**. The agent instructions and schema are specifications, not a working automated analyser.
+
+
+### Probe harness CI verification — 2026-11-13
+
+The first CI run for the new probe tests caught a test import/monkeypatch target issue; it did not reach the live adapter. The test was corrected to import and patch `yti.transcript_probe` directly. Latest verified CI run [43463631750](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43463631750) passed on the probe implementation: **37 tests passed**, and the existing five-video sample scoring/report pipeline completed. This validates the bounded runner's mocked behavior and privacy-safe report shape only. It is not live YouTube validation.

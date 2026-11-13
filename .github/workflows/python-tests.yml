@@ -35,4 +35,16 @@ jobs:
       - name: Run sample scoring pipeline
         run: |
           yti score --input data/sample_videos.json --output runs/ci/outliers.csv
+          yti report --input runs/ci/outliers.csv --output runs/ci/report.md
           test -s runs/ci/outliers.csv
+          test -s runs/ci/report.md
+      - name: Upload scoring outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: youtube-intelligence-ci-${{ github.run_number }}
+          path: |
+            youtube-intelligence/runs/ci/outliers.csv
+            youtube-intelligence/runs/ci/report.md
+          if-no-files-found: warn
+          retention-days: 14

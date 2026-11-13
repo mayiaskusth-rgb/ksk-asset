@@ -599,3 +599,13 @@ Next: verify latest CI; confirm current yt-dlp API output details before live us
 GitHub Actions run [43459990611](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43459990611) completed successfully on commit `4bb8905f4c8d7ba11eade85c7346548e930f992a`: **31 tests passed**, and the existing sample scoring/report pipeline completed. This run includes the parser, adapter and CLI tests. Subsequent commits in this branch are documentation-only; a workflow for the newest README commit `375e14b4cd10a06c4ea71eecc2d2c0b462e78839` is queued and must be checked before final PR review.
 
 Earlier failures on this branch were due to the existing explorer placeholder-string assertion. The page wording was corrected, and later runs passed.
+
+
+### Adapter hardening follow-up (2026-11-13)
+
+The adapter now also:
+- sets `noplaylist=True` so a supplied URL cannot expand into a playlist batch;
+- allows regional variants only when the requested language is a base code (e.g. `en`); an explicit regional request (e.g. `en-US`) must match exactly;
+- maps additional bot-verification wording to the blocked state.
+
+Tests cover single-video scope and strict regional language matching. These changes are pending the newest CI run.

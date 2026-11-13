@@ -61,20 +61,54 @@ The engine must be developed and tested as a Python product. Manual web searches
 
 
 
-## Private transcript persistence (Cloudflare)
+## Current platform status — 2026-11-14
 
-The private Worker/D1 persistence layer and local integration coverage were merged in [PR #17](https://github.com/mayiaskusth-rgb/ksk-asset/pull/17) (merge commit `f755d4da8e7c24bfa4c1bd6f4d89f62cda1939df`). The existing [YouTube Research Run Explorer](research.html) now includes a Transcript tab on each shortlisted video: paste a transcript copied manually from YouTube, save it against that video's canonical YouTube ID, and retrieve saved revisions. The transcript text is sent to the Worker and is not written into this public repository.
+This section supersedes the earlier transcript-persistence and authentication status notes below this README's original gallery/engine overview.
 
-The Worker API supports canonical video upsert, manual transcript save, idempotent duplicate detection, revision history and retrieval. The Explorer stores only the non-secret Worker base URL in the browser. Browser requests are restricted by CORS to the GitHub Pages origin; CORS is not authentication. Private API routes are being updated in PR #18 to use owner-password login and short-lived signed bearer sessions. The password and signing key remain Cloudflare runtime secrets; neither is stored in GitHub or browser localStorage.
+### Live transcript workflow
 
-**Current status (2026-11-14):** PR #17 is merged. Cloudflare API checks and Python tests passed on the final PR head `5df01cf74072209bf6772d58fbeda7e5a5ea018b` (Cloudflare run [43509893658](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509893658); Python run [43509893760](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509893760)). Main-branch Cloudflare API checks, Python tests and GitHub Pages deployment all passed for merge commit `f755d4da8e7c24bfa4c1bd6f4d89f62cda1939df` (runs [43509948988](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509948988), [43509949086](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509949086), and [43509949087](https://github.com/mayiaskusth-rgb/ksk-asset/actions/runs/43509949087)). The Cloudflare Access application/policy is not configured, the Worker is not deployed, and the remote D1 migration has not been applied. Therefore the UI is implemented and CI-verified, but the real phone-to-Cloudflare round trip is not yet available. Do not make the API public or bypass authentication to speed this up.
+- The Research Run Explorer is published at [GitHub Pages](https://mayiaskusth-rgb.github.io/ksk-asset/research.html).
+- Its Transcript tab uses the selected shortlist video's existing YouTube ID and title/channel metadata. The Worker API URL is built into the page; there is no API URL setup field.
+- The private API runs as the Cloudflare Worker `ksk-research-api` at `https://ksk-research-api.mayiaskusth.workers.dev`.
+- Owner-password login exchanges the password for a 20-minute HMAC-SHA256 signed bearer session. The session token is held in tab-scoped `sessionStorage`; the password is not stored by the page. Worker secrets are `OWNER_PASSWORD` and `SESSION_SECRET`; never commit or share them.
+- Login attempts use Cloudflare Workers Rate Limiting: 5 attempts per 60 seconds per client IP per Cloudflare location. This is approximate/eventually consistent and location-local, not a strict global limit.
+- D1 database `ksk-research-dev` has its remote migrations applied. The manually gated migration workflow is separate from Worker deployment.
+- The user has completed a live browser round trip: save a transcript, refresh/reopen, and retrieve the saved transcript successfully.
 
-See [Cloudflare setup and API notes](cloudflare/README.md) and the current [engineering handoff](youtube-intelligence/HANDOFF.md) for the exact deployment/authentication gate.
+### Current transcript save semantics
 
+PR [#21](https://github.com/mayiaskusth-rgb/ksk-asset/pull/21) simplified the editor and API:
 
-**Authentication update (2026-11-14):** PR [#18](https://github.com/mayiaskusth-rgb/ksk-asset/pull/18) implements the no-Access owner-password flow. It is not merged or live yet. Cloudflare Workers Builds is being configured with repository root `cloudflare` and Worker name `ksk-research-api`. Do not deploy until PR #18 is approved/merged, CI passes, and runtime secrets plus login rate limiting are configured. No remote D1 migration or live transcript test has happened.
+- Opening the Transcript tab retrieves the latest saved transcript into the editor.
+- A first save creates the transcript record; saving identical text is idempotent.
+- Editing and saving updates the current/latest transcript record in place. The current editor does not create a new revision history.
+- Older historical D1 rows, if any, are not deleted by this change. The API's current retrieval path returns the latest transcript.
+- The UI reports saving, unchanged, saved, updated, and failure states.
 
+### Recent merged implementation
 
-### Worker login protection
+| PR | Change | Status |
+|---|---|---|
+| [#17](https://github.com/mayiaskusth-rgb/ksk-asset/pull/17) | Initial private transcript persistence and editor | Merged |
+| [#18](https://github.com/mayiaskusth-rgb/ksk-asset/pull/18) | Owner-password authentication and signed sessions | Merged |
+| [#19](https://github.com/mayiaskusth-rgb/ksk-asset/pull/19) | Login rate limiting | Merged |
+| [#20](https://github.com/mayiaskusth-rgb/ksk-asset/pull/20) | Manually gated remote D1 migration workflow | Merged; workflow run and remote schema verified |
+| [#21](https://github.com/mayiaskusth-rgb/ksk-asset/pull/21) | Simpler transcript editor and update-in-place save flow | Merged |
 
-The Cloudflare persistence API includes a Cloudflare Workers Rate Limiting binding for login attempts (5 per 60 seconds per client IP per Cloudflare location). The limit is approximate and location-local, not a strict global limit. See `cloudflare/README.md` and `youtube-intelligence/HANDOFF.md` for deployment gates and verification status.
+PR #21 merge commit: `ac94ad0cdf0ebab3a753643e03418084fdfa44e2`.
+
+### Security and deployment notes
+
+- `/health` is a minimal public liveness endpoint; private API routes require a valid signed session.
+- CORS is restricted to the GitHub Pages origin. CORS is not authentication.
+- The `workers.dev` endpoint is currently enabled and reachable. Do not describe it as disabled.
+- Do not expose unauthenticated private routes, put credentials in the public repository, or repeat automated YouTube transcript extraction attempts. The supported input path for now is manual transcript copy/paste.
+- Do not run remote migrations or change deployment/security settings without explicit user approval.
+
+### Documentation ownership
+
+- This root README describes the public gallery, the independent YouTube Intelligence product, and their boundary with the private KSK repository.
+- `youtube-intelligence/README.md` describes the Python product.
+- `youtube-intelligence/HANDOFF.md` is the detailed engineering handoff and should be checked against live GitHub state before further work.
+- `cloudflare/README.md` describes the Worker, D1, authentication, deployment, and API contract.
+- The private `kabhi-socha-kya` repository remains the source of truth for KSK editorial workflow and private episode artefacts. There is no automated runtime integration between the two repositories.

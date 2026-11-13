@@ -82,7 +82,8 @@ class YtDlpTranscriptAdapter:
         common = {
             "quiet": True,
             "no_warnings": True,
-            "skip_download": True,\n            "noplaylist": True,
+            "skip_download": True,
+            "noplaylist": True,
             "socket_timeout": self.socket_timeout,
             "retries": 0,
             "fragment_retries": 0,

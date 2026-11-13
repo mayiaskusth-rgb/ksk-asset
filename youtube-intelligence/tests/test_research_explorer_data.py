@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[2]  # Repository root for public research fixtures
 RUN_INDEX = REPO_ROOT / "research-runs" / "index.json"
 EXPLORER_PAGE = REPO_ROOT / "research.html"
 

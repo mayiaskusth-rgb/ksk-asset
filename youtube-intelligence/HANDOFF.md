@@ -2,7 +2,7 @@
 
 **Purpose:** This is the authoritative product and engineering handoff for the independent YouTube research module in this repository. A new ChatGPT engineering chat should read this file and the current code before making changes.
 
-**Start command for the next chat:** “Read this handoff, the root README, cloudflare/README.md, and the live GitHub PR/Actions state before doing anything. Continue from the latest 2026-11-14 owner-password authentication checkpoint. The user wants a concise close-out, is Android-only, and explicitly said STOP before requesting documentation updates. Do not merge PR #18, deploy, migrate the remote database, or make other GitHub changes without fresh explicit approval. Do not ask for card details or local shell commands.”
+**Start command for the next chat:** “Read this handoff, both repository READMEs, `cloudflare/README.md`, and the live GitHub state before making changes. Continue from the verified 2026-11-14 transcript-persistence checkpoint. The user is Android-only and prefers concise guidance and work done directly through GitHub. Preserve existing repository structure and historical documentation. Do not ask for terminal commands, passwords, API tokens, or card details. Do not change deployment/security settings or run remote migrations without explicit approval.”
 
 **Repository:** [mayiaskusth-rgb/ksk-asset](https://github.com/mayiaskusth-rgb/ksk-asset)  
 **Module:** `youtube-intelligence/`  
@@ -945,3 +945,78 @@ This section supersedes earlier handoff statements that Cloudflare Access is the
 ## 26. Worker login rate limiting update — 2026-11-14
 
 A follow-up branch `feature/worker-login-rate-limit` adds Cloudflare's Workers Rate Limiting binding to `POST /api/auth/login` (5 attempts per 60 seconds per client IP, per Cloudflare location). This is approximate/eventually consistent, not a strict global cap. It is an additional abuse-control layer, not a substitute for strong secrets. CI and deployment status must be verified from the live PR and workflow runs. The currently deployed Worker is not protected by this code until the change is merged and deployed. Do not configure production secrets or enable `workers.dev` until the rate-limit update is merged, deployed, and verified.
+
+
+---
+
+## 27. Verified transcript persistence and PR #21 close-out — 2026-11-14
+
+This section is the latest authoritative status snapshot. Older sections below/above record historical checkpoints and may describe states that have since changed.
+
+### Repository responsibilities
+
+- **Private `kabhi-socha-kya`:** KSK editorial system — discovery, five cognitive lenses, research/challenge, story architecture, scripts, reviews, visual planning, approval gates, workflow governance, and private episode artefacts.
+- **Public `ksk-asset`:** public-safe visual asset gallery plus the independent `youtube-intelligence/` Python research-engineering product.
+- The YouTube Intelligence engine is **not a KSK agent** and is not part of KSK orchestration. It may eventually produce evidence-backed audience-opportunity reports that KSK humans can consider. There is no automated runtime integration or editorial authority.
+
+### Merged implementation
+
+| PR | Result |
+|---|---|
+| [#17](https://github.com/mayiaskusth-rgb/ksk-asset/pull/17) | Initial Worker/D1 transcript persistence and shortlist Transcript tab |
+| [#18](https://github.com/mayiaskusth-rgb/ksk-asset/pull/18) | Owner-password login and 20-minute HMAC-SHA256 signed bearer sessions |
+| [#19](https://github.com/mayiaskusth-rgb/ksk-asset/pull/19) | Cloudflare Workers Rate Limiting binding for login |
+| [#20](https://github.com/mayiaskusth-rgb/ksk-asset/pull/20) | Manually gated remote D1 migration workflow; user ran it and verified the migration/table state |
+| [#21](https://github.com/mayiaskusth-rgb/ksk-asset/pull/21) | Simplified transcript editor, fixed Worker URL, session handling, retrieve-on-open, clearer save states, and update-in-place semantics |
+
+PR #21 was merged to `main` as `ac94ad0cdf0ebab3a753643e03418084fdfa44e2`. Its PR-head Cloudflare API CI passed before merge. The main-branch Cloudflare and Pages workflows were started by the merge; the user subsequently confirmed the new transcript flow works.
+
+### Current runtime and persistence
+
+- GitHub Pages Explorer: https://mayiaskusth-rgb.github.io/ksk-asset/research.html
+- Cloudflare Worker: `ksk-research-api`
+- Worker endpoint: https://ksk-research-api.mayiaskusth.workers.dev
+- D1 database: `ksk-research-dev`, ID `31c27fa9-cd26-4ac2-867d-710096093dad`
+- Remote D1 migration workflow is manually dispatched; user ran it successfully. D1 migration ledger showed `0001_initial.sql` applied and application tables present.
+- Worker `/health` endpoint returned `{"ok":true,"service":"ksk-research-api"}`.
+- Cloudflare dashboard showed the Worker deployment Ready, 100% traffic and 0% error rate at the deployment checkpoint.
+- The `workers.dev` route is enabled/reachable. Do not claim it is disabled.
+
+### Authentication and rate limiting
+
+- `POST /api/auth/login` checks the encrypted Worker secret `OWNER_PASSWORD`.
+- A successful login returns a 20-minute HMAC-SHA256 signed bearer session using encrypted Worker secret `SESSION_SECRET`.
+- Keep both secrets only in Cloudflare Worker secret settings. Never request or place their values in chat, GitHub, README files, or browser storage.
+- The Research Explorer keeps the session token in tab-scoped `sessionStorage`; the owner password is not persisted by the page.
+- Login rate limiting: 5 attempts per 60 seconds per client IP per Cloudflare location. It is approximate/eventually consistent and location-local, not a strict global cap.
+- `GET /health` is public and intentionally minimal. Private API routes require a valid bearer session.
+- CORS allows the GitHub Pages origin only; CORS is not authentication.
+
+### Current editor behaviour (PR #21)
+
+1. The Transcript tab uses the selected shortlist video's canonical YouTube ID/title/channel.
+2. The Worker URL is hardcoded in the page; no API URL field or localStorage API URL setup remains.
+3. Opening the tab retrieves the latest saved transcript into the editor.
+4. First save creates a transcript record. Identical content is idempotent.
+5. Editing and saving updates the current/latest transcript record in place. The current editor does not create new transcript revisions.
+6. Older historical D1 rows are not deleted by this change; retrieval returns the latest transcript.
+7. UI states include saving, unchanged, saved, updated, and failure.
+
+### End-to-end verification
+
+The user confirmed the following on the live Research Explorer: saved a transcript, refreshed/reopened the page, and saw the saved transcript retrieved again. This verifies the basic browser → authenticated Worker → D1 → browser save/retrieve round trip.
+
+Do not overstate this test: it does not by itself verify every security edge case, rate-limit behaviour from multiple locations, backup/restore, or production-scale reliability.
+
+### Immediate next engineering task
+
+Continue with transcript-intelligence analysis using a manually supplied transcript. Preserve provenance and timestamps, quote only short evidence spans, and distinguish transcript-observable features from visual/audio features. Do not restart automated transcript extraction attempts from GitHub-hosted runners; both prior approaches were blocked by YouTube access challenges.
+
+### Working rules
+
+- User is Android-only; do not ask them to run shell commands.
+- Keep responses concise and guide through UI only when user action is necessary.
+- Preserve existing folders, agent instructions, lifecycle/versioning conventions, and historical records. Prefer additive edits; do not delete broad sections or rewrite architecture casually.
+- Report implemented, tested, experimentally validated, deployed, and live-verified as separate states.
+- Do not claim background work continues after a response ends.
+- No merge, deployment/security-setting change, or remote D1 migration without explicit approval. PR #21 merge and the existing D1 migration are complete; future changes still require their normal approvals.

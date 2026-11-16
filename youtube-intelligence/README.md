@@ -98,7 +98,7 @@ The intended analysis covers concepts, multi-label content format, narrative mod
 5. [ ] Creator baseline builder and format/age-aware comparisons.
 6. [ ] Views-to-subscriber and improved creator-relative outlier analysis.
 7. [ ] Adaptive research strategist that refines discovery from broad topic briefs.
-8. [x] Transcript adapter, normalization, and bounded one-or-two-video probe harness (live validation pending).
+8. [x] Transcript adapter, normalization, and bounded one-or-two-video probe harness (automated live extraction was blocked by YouTube access challenges; manual transcript persistence is live-verified).
 9. [ ] Thumbnail/frame observation workflow.
 10. [ ] Comment-theme and audience-question analysis using permitted, privacy-conscious samples.
 11. [ ] Transcript intelligence reports and comparative storytelling analysis with timestamped evidence; then evidence-backed opportunity reports.
@@ -106,9 +106,9 @@ The intended analysis covers concepts, multi-label content format, narrative mod
 13. [ ] Reliability improvements: caching, retries, logging, quota/cost controls, and versioned reports.
 14. [ ] Consider a dashboard only after the CLI research engine is reliable.
 
-**Immediate next work:** complete the live private-persistence setup and one manually supplied transcript round trip. The shortlist Transcript tab and Worker/D1 API implementation are merged and CI-verified, but Cloudflare Access is not configured, the Worker is not deployed, and the remote D1 migration is not applied. The two GitHub-hosted transcript extraction approaches have already been tested and blocked; do not repeat them or expand to bulk collection. Once one transcript can be saved and retrieved securely, use it to test analysis.
+**Immediate next work:** use the verified manual transcript round trip as input to the transcript-intelligence analysis implementation. The live Worker/D1 persistence, owner-password authentication, login rate limiting, and remote migration are in place. The user has confirmed saving a manually pasted transcript, refreshing the page, and retrieving it again. Keep the workflow narrow: one manually supplied transcript at a time, evidence-backed timestamp references, and no claims about visual editing or causal retention effects from transcript-only evidence. Do not repeat automated transcript extraction attempts from GitHub-hosted runners; both prior approaches were blocked by YouTube access challenges.
 
 
 ## Transcript access diagnostic
 
-The first live yt-dlp request was challenged by YouTube on a GitHub-hosted runner. We are testing the alternative provider as a separate manual diagnostic, not as a fallback. See docs/experiments/transcript_collection.md. The original yt-dlp workflow and adapter remain unchanged.
+The first live yt-dlp request and the separate `youtube-transcript-api` diagnostic were blocked by YouTube access challenges on GitHub-hosted runners. Neither retrieved transcript text. These experiments are closed for now; do not repeat them or treat workflow completion as successful transcript acquisition. The current supported path is manual browser copy/paste into the authenticated Research Explorer Transcript tab. See docs/experiments/transcript_collection.md for historical experiment details.
